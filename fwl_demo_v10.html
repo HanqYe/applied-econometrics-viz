@@ -1,0 +1,2275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+<title>FWL Geometric Demo</title>
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background: oklch(0.155 0.006 60);
+    color: oklch(0.965 0.004 85);
+    font-family: "Schibsted Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+  .slide {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
+  .slide.active { display: flex; }
+  .stage {
+    width: 90vw;
+    max-width: 1400px;
+    height: 75vh;
+    position: relative;
+  }
+  svg { width: 100%; height: 100%; display: block; }
+  .caption {
+    position: absolute;
+    bottom: 4vh;
+    left: 0; right: 0;
+    text-align: center;
+    font-size: 1.4vw;
+    color: oklch(0.8 0.006 78);
+    line-height: 1.6;
+    padding: 0 6vw;
+    min-height: 3em;
+  }
+  .caption .accent-red { color: #FF6B6B; font-weight: 500; }
+  .caption .accent-blue { color: #58C4DD; font-weight: 500; }
+  .caption .accent-warmth { color: #F0A040; font-weight: 500; }
+  .caption .accent-comp { color: #3DD9C9; font-weight: 500; }
+  .caption .accent-y { color: #C8B6FF; font-weight: 500; }
+
+  .pager {
+    position: absolute;
+    bottom: 1.5vh;
+    right: 2vw;
+    font-size: 0.85vw;
+    color: oklch(0.55 0.006 70);
+    font-variant-numeric: tabular-nums;
+  }
+  .hint {
+    position: absolute;
+    bottom: 1.5vh;
+    left: 2vw;
+    font-size: 1.05vw;
+    color: oklch(0.55 0.006 70);
+  }
+  .play-btn {
+    position: absolute;
+    top: 2vh;
+    right: 2vw;
+    background: oklch(0.185 0.007 60);
+    border: 1px solid oklch(0.34 0.008 60);
+    color: oklch(0.8 0.006 78);
+    padding: 0.5vw 1vw;
+    font-size: 0.9vw;
+    cursor: pointer;
+    border-radius: 4px;
+    font-family: inherit;
+  }
+  .play-btn:hover { background: oklch(0.225 0.009 62); color: oklch(0.965 0.004 85); }
+
+  .back-link {
+    position: absolute; top: 2vh; left: 2vw; z-index: 10;
+    display: inline-flex; align-items: center;
+    font-family: "Schibsted Grotesk", sans-serif; font-size: 1.15vw; font-weight: 600;
+    color: oklch(0.8 0.006 78); text-decoration: none; letter-spacing: 0.01em;
+    background: oklch(0.185 0.007 60); border: 1px solid oklch(0.34 0.008 60);
+    padding: 0.7vw 1.3vw; border-radius: 6px; transition: background .18s ease, color .18s ease, border-color .18s ease;
+  }
+  .back-link:hover { background: oklch(0.225 0.009 62); color: oklch(0.965 0.004 85); border-color: oklch(0.46 0.02 220); }
+
+  /* enlarged β̂ / β̃ accents in HTML captions */
+  /* LaTeX-style β̂ / β̃ accents in HTML captions — vector, drawn via mask so
+     they inherit the span's accent color and sit at a proper distance. */
+  .caption .hacc, .caption .tacc { position: relative; }
+  .caption .acc {
+    position: absolute; left: 50%; transform: translateX(-50%);
+    bottom: 0.84em; width: 0.74em; height: 0.34em; overflow: visible;
+    fill: none; stroke: currentColor; stroke-width: 2.6;
+    stroke-linecap: round; stroke-linejoin: round;
+  }
+
+  /* MathJax-style math substitute using unicode + italics */
+  .math { font-family: "STIX Two Text", "STIX Two Math", Georgia, serif; font-style: italic; }
+
+  text { font-family: "STIX Two Text", "STIX Two Math", Georgia, serif; }
+  text.label { font-style: italic; }
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800;900&family=STIX+Two+Text:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+</head>
+<body>
+<a class="back-link" href="index.html">← All visualizations</a>
+
+<!-- Slide 0: title -->
+<div class="slide" id="s0">
+  <div class="stage"><svg id="svg0" viewBox="0 0 1400 800" preserveAspectRatio="xMidYMid meet"></svg></div>
+</div>
+
+<!-- Slide 1: scatter plot of warmth vs competence -->
+<div class="slide" id="s1">
+  <div class="stage"><svg id="svg1" viewBox="0 0 1400 800" preserveAspectRatio="xMidYMid meet"></svg></div>
+  <div class="caption">
+    Cross-section data: each row is a person with two predictors,
+    <span class="accent-comp">X<tspan>₁</tspan></span> and
+    <span class="accent-warmth">X<tspan>₂</tspan></span>.
+  </div>
+</div>
+
+<!-- Slide 2: abstract to two non-orthogonal column-space directions -->
+<div class="slide" id="s2">
+  <div class="stage"><svg id="svg2" viewBox="0 0 1400 800" preserveAspectRatio="xMidYMid meet"></svg></div>
+  <div class="caption">
+    Each column of <span class="math">X</span> spans a line in ℝ<tspan style="font-size:0.7em; vertical-align:super;">n</tspan>.
+    <span class="accent-comp">Col(X<tspan>₁</tspan>)</span> and
+    <span class="accent-warmth">Col(X<tspan>₂</tspan>)</span> are
+    <span style="color:#fff; font-weight:500;">not orthogonal</span> — the columns are correlated.
+  </div>
+</div>
+
+<!-- Slide 3: y appears -->
+<div class="slide" id="s3">
+  <div class="stage"><svg id="svg3" viewBox="0 0 1400 800" preserveAspectRatio="xMidYMid meet"></svg></div>
+  <div class="caption">
+    The outcome <span class="accent-y">y</span> lives in the same space.
+  </div>
+</div>
+
+<!-- Slide 4: two projections of y onto each direction separately, mark RED -->
+<div class="slide" id="s4">
+  <div class="stage"><svg id="svg4" viewBox="0 0 1400 800" preserveAspectRatio="xMidYMid meet"></svg></div>
+  <div class="caption">
+    Project <span class="accent-y">y</span> onto
+    <span class="accent-comp">Col(X<tspan>₁</tspan>)</span> and
+    <span class="accent-warmth">Col(X<tspan>₂</tspan>)</span> separately. Mark each projection
+    <span class="accent-red">red</span> — they are
+    <span class="accent-red">β̃<tspan>₁</tspan>x<tspan>₁</tspan></span> and
+    <span class="accent-red">β̃<tspan>₂</tspan>x<tspan>₂</tspan></span>.
+  </div>
+</div>
+
+<!-- Slide 5: parallelogram vector-sum of the two red projections, with gap -->
+<div class="slide" id="s5">
+  <div class="stage"><svg id="svg5" viewBox="0 0 1400 800" preserveAspectRatio="xMidYMid meet"></svg></div>
+  <div class="caption">
+    Vector-add the two projections (parallelogram rule).
+    The sum <span class="accent-red">β̃<tspan>₁</tspan>x<tspan>₁</tspan> + β̃<tspan>₂</tspan>x<tspan>₂</tspan></span>
+    misses <span class="accent-y">y</span> — there's a gap.
+  </div>
+</div>
+
+<!-- Slide 6: orthogonalize, then project, mark BLUE -->
+<div class="slide" id="s6">
+  <div class="stage"><svg id="svg6" viewBox="0 0 1400 800" preserveAspectRatio="xMidYMid meet"></svg></div>
+  <div class="caption">
+    Now suppose <span class="accent-comp">Col(X<tspan>₁</tspan>)</span> and
+    <span class="accent-warmth">Col(X<tspan>₂</tspan>)</span> <span style="font-weight:500;">were</span> orthogonal.
+    Project <span class="accent-y">y</span> again — mark these projections <span class="accent-blue">blue</span>.
+  </div>
+</div>
+
+<!-- Slide 7: vector-add the BLUE projections; sum lands on y -->
+<div class="slide" id="s7">
+  <div class="stage"><svg id="svg7" viewBox="0 0 1400 800" preserveAspectRatio="xMidYMid meet"></svg></div>
+  <div class="caption">
+    Vector-add again. With orthogonal regressors the parallelogram is a rectangle, and
+    <span class="accent-blue">β̂<tspan>₁</tspan>x<tspan>₁</tspan> + β̂<tspan>₂</tspan>x<tspan>₂</tspan></span>
+    lands exactly on <span class="accent-y">y</span>.
+  </div>
+</div>
+
+<!-- Slide 8: y always decomposes as β̂₁ x₁ + β̂₂ x₂ -->
+<div class="slide" id="s8">
+  <div class="stage"><svg id="svg8" viewBox="0 0 1400 800" preserveAspectRatio="xMidYMid meet"></svg></div>
+  <div class="caption">
+    <span class="accent-y">y</span> still decomposes uniquely as
+    <span class="accent-blue">β̂<tspan>₁</tspan> x<tspan>₁</tspan> + β̂<tspan>₂</tspan> x<tspan>₂</tspan></span>
+    — slide along each axis to read off the coefficients.
+  </div>
+</div>
+
+<!-- Slide 9: but β̃ (simple projection) ≠ β̂ (joint) -->
+<div class="slide" id="s9">
+  <div class="stage"><svg id="svg9" viewBox="0 0 1400 800" preserveAspectRatio="xMidYMid meet"></svg></div>
+  <div class="caption">
+    Simple projection gives <span class="accent-red">β̃</span>; joint OLS gives <span class="accent-blue">β̂</span>.
+    They are different lengths.
+  </div>
+</div>
+
+<!-- Slide 10: back to non-orthogonal; ask how to orthogonalize -->
+<div class="slide" id="s10">
+  <div class="stage"><svg id="svg10" viewBox="0 0 1400 800" preserveAspectRatio="xMidYMid meet"></svg></div>
+  <div class="caption">
+    The problem is non-orthogonality. <span style="color:#fff; font-weight:500;">Can we build an orthogonal direction out of what we have?</span>
+  </div>
+</div>
+
+<!-- Slide 11: build v = x₂ residualized against x₁; regress y on v -->
+<div class="slide" id="s11">
+  <div class="stage"><svg id="svg11" viewBox="0 0 1400 800" preserveAspectRatio="xMidYMid meet"></svg></div>
+  <div class="caption">
+    Drop X<tspan>₂</tspan> perpendicular to Col(X<tspan>₁</tspan>) → residual <span style="color:#A8E6CF; font-weight:500;">v</span>; project <span class="accent-y">y</span> on <span style="color:#A8E6CF; font-weight:500;">v</span> → <span class="accent-blue">β̂<tspan>₂</tspan></span>.
+    Symmetrically: drop X<tspan>₁</tspan> perpendicular to Col(X<tspan>₂</tspan>) → residual <span style="color:#FFB877; font-weight:500;">u</span>; project <span class="accent-y">y</span> on <span style="color:#FFB877; font-weight:500;">u</span> → <span class="accent-blue">β̂<tspan>₁</tspan></span>.
+  </div>
+</div>
+
+<!-- Slide 12: 3D version — project y onto col(X), collapse to 2D, then residualize -->
+<div class="slide" id="s12">
+  <div class="stage"><svg id="svg12" viewBox="0 0 1400 800" preserveAspectRatio="xMidYMid meet"></svg></div>
+  <div class="caption">
+    In 3D, <span class="accent-y">y</span> projects onto the plane spanned by Col(X<tspan>₁</tspan>) and Col(X<tspan>₂</tspan>) — call it <span style="color:#534AB7; font-weight:500;">ŷ</span>.
+    Within that plane, we residualize X<tspan>₂</tspan> against Col(X<tspan>₁</tspan>) to get <span style="color:#A8E6CF; font-weight:500;">v</span>, then project <span style="color:#534AB7; font-weight:500;">ŷ</span> onto <span style="color:#A8E6CF; font-weight:500;">v</span>.
+  </div>
+</div>
+
+<!-- Slide 13: the FWL recipe summarized -->
+<div class="slide" id="s13">
+  <div class="stage"><svg id="svg13" viewBox="0 0 1400 800" preserveAspectRatio="xMidYMid meet"></svg></div>
+  <div class="caption">
+    We built a new orthogonal basis {Col(X<tspan>₁</tspan>), <span style="color:#A8E6CF; font-weight:500;">v</span>} from the original {Col(X<tspan>₁</tspan>), Col(X<tspan>₂</tspan>)}.
+    In the new basis, simple regressions just work — that's the FWL theorem.
+  </div>
+</div>
+
+<div class="pager" id="pager">1 / 14</div>
+<div class="hint">← → to navigate · Space = next · R = replay animation</div>
+<button class="play-btn" id="playBtn">▶ Replay (R)</button>
+
+<script>
+/* =========================================================
+   GLOBAL GEOMETRY
+   We define a 2D drawing canvas (the "stage") on which we
+   place vectors. Everything is computed from a small set
+   of anchor points so all slides stay geometrically consistent.
+   ========================================================= */
+
+const ORIGIN = { x: 700, y: 600 };  // origin in svg coords
+const UNIT = 90;                     // pixels per unit length
+
+// Non-orthogonal regressor directions (angle between them ~52°)
+// x1 (warmth) points up-right; x2 (competence) is rotated by ~52° counterclockwise from x1.
+const x1_angle = -25 * Math.PI / 180;   // negative because svg y is down
+const x2_angle = -77 * Math.PI / 180;   // 52° gap
+
+// Lengths of the regressor direction "rays" we draw
+const x1_len = 5.5;   // units
+const x2_len = 5.5;
+
+// The data vector y — placed in the cone between x1 and x2 so projections look sensible
+// y has angle roughly -50° and length ~4.2
+const y_angle = -50 * Math.PI / 180;
+const y_len = 4.6;
+
+// Compute endpoints in svg coords
+function vec(angle, length) {
+  return {
+    x: ORIGIN.x + Math.cos(angle) * length * UNIT,
+    y: ORIGIN.y + Math.sin(angle) * length * UNIT
+  };
+}
+
+const X1_dir = { ux: Math.cos(x1_angle), uy: Math.sin(x1_angle) };
+const X2_dir = { ux: Math.cos(x2_angle), uy: Math.sin(x2_angle) };
+
+const X1_end = vec(x1_angle, x1_len);
+const X2_end = vec(x2_angle, x2_len);
+const Y_end  = vec(y_angle, y_len);
+
+// Scalar projection of y onto a unit direction (in units, not pixels)
+function scalarProj(vAngle, vLen, uAngle) {
+  return vLen * Math.cos(vAngle - uAngle);
+}
+
+// Project y onto x1's line (simple regression: just dot product onto unit vector)
+const proj_y_on_x1 = scalarProj(y_angle, y_len, x1_angle); // length along x1 dir
+const proj_y_on_x2 = scalarProj(y_angle, y_len, x2_angle);
+
+// Point on x1 ray that is the foot of the perpendicular from Y_end
+const FOOT_on_x1 = vec(x1_angle, proj_y_on_x1);
+const FOOT_on_x2 = vec(x2_angle, proj_y_on_x2);
+
+// Orthogonal world: x1 stays, x2 becomes perpendicular to x1 (angle = x1_angle - 90°)
+const x2_ortho_angle = x1_angle - Math.PI / 2;
+const X2_ortho_end = vec(x2_ortho_angle, x2_len);
+
+const proj_y_on_x1_ortho = scalarProj(y_angle, y_len, x1_angle); // same x1 → same
+const proj_y_on_x2_ortho = scalarProj(y_angle, y_len, x2_ortho_angle);
+
+const FOOT_on_x1_ortho = vec(x1_angle, proj_y_on_x1_ortho);
+const FOOT_on_x2_ortho = vec(x2_ortho_angle, proj_y_on_x2_ortho);
+
+/* =========================================================
+   COLOR PALETTE
+   Semantic mapping (after morph in slide 2):
+     - x₁ is born from the 'competence' column → x₁ is TEAL
+     - x₂ is born from the 'warmth' column     → x₂ is ORANGE
+   To keep this readable without renaming every usage site, the
+   color names below match each column's *semantic* identity, and
+   slides 3+ assign them to x₁/x₂ accordingly:
+       COLORS.x1 = teal   (was COLORS.comp)
+       COLORS.x2 = orange (was COLORS.x2)
+   We also keep ['X2'] and .comp aliases pointing at the same
+   palette colors for the slide-1/2 table rendering, which labels
+   the original columns by their natural-language names.
+   ========================================================= */
+const COLORS = {
+  // table column colors (semantic): warmth = warm orange, competence = teal
+  warmth: '#F0A040',   // for 'warmth' column header & cells in slide 1
+  comp:   '#3DD9C9',   // for 'competence' column
+  // vector colors after morph: x1 inherits from competence (teal), x2 from warmth (orange)
+  x1:     '#3DD9C9',   // = comp
+  x2:     '#F0A040',   // = warmth
+
+  y:      '#C8B6FF',
+  red:    '#FF6B6B',
+  blue:   '#58C4DD',
+  green:  '#A8E6CF',   // v = x₁ residualized (orthogonal to x₂)
+  faint:  '#444',
+  white:  '#fff',
+  grid:   '#222'
+};
+
+/* =========================================================
+   SVG HELPERS
+   ========================================================= */
+function el(tag, attrs = {}, parent = null) {
+  const n = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  for (const k in attrs) n.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(n);
+  return n;
+}
+
+function arrow(svg, x1, y1, x2, y2, color, width = 2.5, opacity = 1, dashed = false) {
+  const g = el('g', { opacity }, svg);
+  const dx = x2 - x1, dy = y2 - y1;
+  const len = Math.hypot(dx, dy);
+  if (len < 1) return g;
+  const ux = dx / len, uy = dy / len;
+  const head = Math.min(14, len * 0.18);
+  const hx = x2 - ux * head, hy = y2 - uy * head;
+  const px = -uy, py = ux;
+  const w = 6;
+  const line = el('line', {
+    x1, y1, x2: hx, y2: hy,
+    stroke: color, 'stroke-width': width,
+    'stroke-linecap': 'round'
+  }, g);
+  if (dashed) line.setAttribute('stroke-dasharray', '6 5');
+  el('polygon', {
+    points: `${x2},${y2} ${hx + px*w},${hy + py*w} ${hx - px*w},${hy - py*w}`,
+    fill: color
+  }, g);
+  return g;
+}
+
+function line(svg, x1, y1, x2, y2, color, width = 1.5, opacity = 1, dashed = false) {
+  const attrs = {
+    x1, y1, x2, y2, stroke: color,
+    'stroke-width': width, 'stroke-linecap': 'round', opacity
+  };
+  if (dashed) attrs['stroke-dasharray'] = '5 4';
+  return el('line', attrs, svg);
+}
+
+function text(svg, x, y, str, color = '#fff', size = 22, italic = true, weight = 400) {
+  const t = el('text', {
+    x, y, fill: color,
+    'font-size': size,
+    'font-style': italic ? 'italic' : 'normal',
+    'font-weight': weight,
+    'text-anchor': 'start'
+  }, svg);
+  if (/[\u0302\u0303]/.test(str)) buildHatted(t, str, size);
+  else t.textContent = str;
+  return t;
+}
+
+/* Render β̂ / β̃ with a larger, hand-placed accent — the plain combining
+   marks render tiny in the serif. Strips each combining mark and lays a
+   sized caret / tilde centered over its base glyph (measured via the SVG
+   text metrics). Shares the parent <text> node, so opacity/fill animate together. */
+function buildHatted(t, str, size) {
+  const bases = [];
+  let stripped = '';
+  for (let i = 0; i < str.length; i++) {
+    const c = str[i];
+    if (c === '\u0302' || c === '\u0303') { if (stripped.length) bases.push({ idx: stripped.length - 1, type: c }); }
+    else stripped += c;
+  }
+  t.textContent = stripped;
+  t.setAttribute('xml:space', 'preserve');   // 1:1 char↔glyph mapping so getExtentOfChar is exact
+  const svg = t.ownerSVGElement;
+  if (!svg) return;
+  const marks = [];
+  const place = () => {
+    bases.forEach((b, k) => {
+      let ext;
+      try { ext = t.getExtentOfChar(b.idx); } catch (e) { return; }
+      const cx = ext.x + ext.width / 2;
+      const half = Math.max(ext.width * 0.44, size * 0.22);
+      const topY = ext.y - size * 0.12;            // small gap above the glyph
+      const sw = Math.max(1.5, size * 0.058);
+      let d;
+      if (b.type === '\u0302') {                    // LaTeX-style caret (hat)
+        const h = size * 0.20;
+        d = `M ${cx - half} ${topY} L ${cx} ${topY - h} L ${cx + half} ${topY}`;
+      } else {                                       // tilde
+        const amp = size * 0.11, w = half * 2, x0 = cx - half, yc = topY - amp;
+        d = `M ${x0} ${yc + amp} C ${x0 + w * 0.22} ${yc - amp}, ${x0 + w * 0.40} ${yc - amp}, ${cx} ${yc}` +
+            ` C ${x0 + w * 0.60} ${yc + amp}, ${x0 + w * 0.78} ${yc + amp}, ${x0 + w} ${yc - amp}`;
+      }
+      let m = marks[k];
+      if (!m) { m = el('path', { fill: 'none', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, svg); marks[k] = m; }
+      m.setAttribute('d', d);
+      m.setAttribute('stroke', t.getAttribute('fill') || '#fff');
+      m.setAttribute('stroke-width', sw);
+      const op = t.getAttribute('opacity');
+      m.setAttribute('opacity', op == null ? 1 : op);
+    });
+  };
+  // Measure after layout settles so post-creation changes (e.g. text-anchor
+  // set later) are reflected — a microtask fires too early and mis-places the
+  // accent on centered labels.
+  requestAnimationFrame(() => requestAnimationFrame(place));
+  // keep the marks' opacity in sync with the text's fade-in; clean up when removed
+  const mo = new MutationObserver(() => {
+    const op = t.getAttribute('opacity');
+    for (const m of marks) if (op != null) m.setAttribute('opacity', op);
+    if (!t.isConnected) { mo.disconnect(); for (const m of marks) m.remove(); }
+  });
+  mo.observe(t, { attributes: true, attributeFilter: ['opacity'] });
+}
+
+function rightAngleMark(svg, footX, footY, fromX, fromY, alongX, alongY, color = '#888', size = 10) {
+  // foot is the corner; we draw a small square at the foot
+  const ax = footX - fromX, ay = footY - fromY;
+  const aLen = Math.hypot(ax, ay) || 1;
+  const aux = ax / aLen, auy = ay / aLen;
+  const bx = footX - alongX, by = footY - alongY;
+  const bLen = Math.hypot(bx, by) || 1;
+  const bux = bx / bLen, buy = by / bLen;
+  const p1x = footX - aux * size, p1y = footY - auy * size;
+  const p2x = footX - bux * size, p2y = footY - buy * size;
+  const p3x = footX - aux * size - bux * size, p3y = footY - auy * size - buy * size;
+  el('polyline', {
+    points: `${p1x},${p1y} ${p3x},${p3y} ${p2x},${p2y}`,
+    fill: 'none', stroke: color, 'stroke-width': 1.2, opacity: 0.7
+  }, svg);
+}
+
+/* =========================================================
+   ANIMATION UTILITY
+   Animates a numeric "progress" 0→1 over duration ms,
+   calling onFrame each tick. Returns a Promise.
+   ========================================================= */
+function animate(duration, onFrame, easing = t => t < .5 ? 2*t*t : 1 - Math.pow(-2*t+2,2)/2) {
+  return new Promise(resolve => {
+    const start = performance.now();
+    function frame(now) {
+      const t = Math.min(1, (now - start) / duration);
+      const e = easing(t);
+      onFrame(e);
+      if (t < 1) requestAnimationFrame(frame);
+      else resolve();
+    }
+    requestAnimationFrame(frame);
+  });
+}
+
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+function clear(svg) { while (svg.firstChild) svg.removeChild(svg.firstChild); }
+
+/* =========================================================
+   SLIDE 1 — cross-section data TABLE
+   ========================================================= */
+// A small deterministic dataset: id, Y, warmth, competence
+// Designed so that warmth and competence are positively correlated.
+function generateTableData() {
+  let seed = 7;
+  function rand() {
+    seed = (seed * 9301 + 49297) % 233280;
+    return seed / 233280;
+  }
+  function normal() {
+    let u = 0, v = 0;
+    while (u === 0) u = rand();
+    while (v === 0) v = rand();
+    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+  }
+  const rho = 0.6;
+  const rows = [];
+  for (let i = 0; i < 8; i++) {
+    const z1 = normal(), z2 = normal();
+    const warmth = 5 + 1.5 * z1;
+    const competence = 5 + 1.5 * (rho * z1 + Math.sqrt(1 - rho * rho) * z2);
+    const noise = normal() * 0.8;
+    const y = 2 + 0.6 * warmth + 0.9 * competence + noise;
+    rows.push({
+      id: i + 1,
+      y: y.toFixed(2),
+      X1: competence.toFixed(2),
+      X2: warmth.toFixed(2)
+    });
+  }
+  return rows;
+}
+const TABLE_DATA = generateTableData();
+
+function renderSlide1() {
+  const svg = document.getElementById('svg1');
+  clear(svg);
+
+  // Table layout inside the 1400×800 viewBox
+  const tableX = 380;        // left edge of table
+  const tableY = 140;        // top edge
+  const colW = 160;          // column width
+  const rowH = 52;           // row height
+  const headerH = 60;        // header row height
+  const cols = ['id', 'y', 'X1', 'X2'];
+  const headerColors = {
+    id: '#888',
+    y: COLORS.y,
+    X1: COLORS.x1,
+    X2: COLORS.x2
+  };
+
+  // Header row
+  cols.forEach((c, j) => {
+    const x = tableX + j * colW + colW / 2;
+    const y = tableY + headerH / 2 + 8;
+    const t = text(svg, x, y, c, headerColors[c], 26, true, 500);
+    t.setAttribute('text-anchor', 'middle');
+    t.setAttribute('data-header', c);
+    t.setAttribute('opacity', 0);
+    setTimeout(() => {
+      animate(400, k => t.setAttribute('opacity', k));
+    }, j * 80);
+  });
+
+  // Header underline
+  const underline = el('line', {
+    x1: tableX, y1: tableY + headerH,
+    x2: tableX + cols.length * colW, y2: tableY + headerH,
+    stroke: '#555', 'stroke-width': 1, opacity: 0
+  }, svg);
+  setTimeout(() => animate(300, t => underline.setAttribute('opacity', t * 0.7)), 400);
+
+  // Data rows
+  TABLE_DATA.forEach((row, i) => {
+    cols.forEach((c, j) => {
+      const x = tableX + j * colW + colW / 2;
+      const y = tableY + headerH + i * rowH + rowH / 2 + 8;
+      const cellColor = (c === 'id') ? '#888' : '#ddd';
+      const t = text(svg, x, y, String(row[c]), cellColor, 22, false, 400);
+      t.setAttribute('text-anchor', 'middle');
+      t.setAttribute('data-col', c);
+      t.setAttribute('data-row', i);
+      t.setAttribute('opacity', 0);
+      // stagger: row by row, left to right
+      const delayMs = 500 + i * 60 + j * 20;
+      setTimeout(() => {
+        animate(300, k => t.setAttribute('opacity', k * 0.95));
+      }, delayMs);
+    });
+  });
+
+  // "n = 8" note (or whatever)
+  setTimeout(() => {
+    const note = text(svg, tableX + (cols.length * colW) / 2,
+      tableY + headerH + TABLE_DATA.length * rowH + 50,
+      `n = ${TABLE_DATA.length}`, '#666', 18, true);
+    note.setAttribute('text-anchor', 'middle');
+    note.setAttribute('opacity', 0);
+    animate(400, k => note.setAttribute('opacity', k));
+  }, 1500);
+}
+
+/* =========================================================
+   SLIDE 2 — table columns morph into vectors
+   The 'competence' column morphs into x₁ (warmth-colored line).
+   The 'warmth' column morphs into x₂ (comp-colored line).
+   Wait — the user specified: competence → x₁, warmth → x₂.
+   So the x₁ direction (the one we've been drawing in 'warmth' color) is
+   semantically competence here. We'll re-color the vectors in this slide
+   to match the column headers' colors, so the morph is visually continuous.
+   ========================================================= */
+async function renderSlide2(animateIt = true) {
+  const svg = document.getElementById('svg2');
+  clear(svg);
+
+  // Re-create table positions (same as slide 1)
+  const tableX = 380, tableY = 140, colW = 160, rowH = 52, headerH = 60;
+  const cols = ['id', 'y', 'X1', 'X2'];
+  const headerColors = {
+    id: '#888',
+    y: COLORS.y,
+    X1: COLORS.x1,
+    X2: COLORS.x2
+  };
+
+  // Render the static table (instantly, no stagger)
+  const headerNodes = {};
+  cols.forEach((c, j) => {
+    const x = tableX + j * colW + colW / 2;
+    const y = tableY + headerH / 2 + 8;
+    const t = text(svg, x, y, c, headerColors[c], 26, true, 500);
+    t.setAttribute('text-anchor', 'middle');
+    headerNodes[c] = t;
+  });
+  const underline = el('line', {
+    x1: tableX, y1: tableY + headerH,
+    x2: tableX + cols.length * colW, y2: tableY + headerH,
+    stroke: '#555', 'stroke-width': 1, opacity: 0.7
+  }, svg);
+
+  const cellNodes = {};
+  TABLE_DATA.forEach((row, i) => {
+    cellNodes[i] = {};
+    cols.forEach((c, j) => {
+      const x = tableX + j * colW + colW / 2;
+      const y = tableY + headerH + i * rowH + rowH / 2 + 8;
+      const cellColor = (c === 'id') ? '#888' : '#ddd';
+      const t = text(svg, x, y, String(row[c]), cellColor, 22, false, 400);
+      t.setAttribute('text-anchor', 'middle');
+      cellNodes[i][c] = t;
+    });
+  });
+
+  await delay(500);
+
+  // -----------------------------------------------------------
+  // MORPH PHASE 1 — competence column → x₁ vector
+  // -----------------------------------------------------------
+  // The 'competence' header travels to become the x₁ label at the vector tip.
+  // The 8 cell values converge towards the vector tip, fading as they arrive.
+  // A line grows from the origin to the tip.
+  //
+  // Per user spec: competence becomes x₁ (the direction we draw with the
+  // "warmth-colored" angle). We keep the COMPETENCE color (teal) for this
+  // vector here to preserve visual continuity from the table.
+  // -----------------------------------------------------------
+
+  // Target: x₁ vector tip (using competence COLOR but x₁ ANGLE)
+  const X1Header = headerNodes.X1;
+  const X1Cells = TABLE_DATA.map((_, i) => cellNodes[i].X1);
+  const headerStart_X1 = {
+    x: tableX + cols.indexOf('X1') * colW + colW / 2,
+    y: tableY + headerH / 2 + 8
+  };
+  // label position at the tip of x₁
+  const labelTarget_x1 = { x: X1_end.x + 14, y: X1_end.y + 8 };
+
+  // Animate: line grows from origin to X1_end while cells fade & converge
+  const x1Line = el('line', {
+    x1: ORIGIN.x, y1: ORIGIN.y, x2: ORIGIN.x, y2: ORIGIN.y,
+    stroke: COLORS.comp, 'stroke-width': 3, 'stroke-linecap': 'round', opacity: 0
+  }, svg);
+
+  // Origin dot
+  const originDot = el('circle', { cx: ORIGIN.x, cy: ORIGIN.y, r: 4, fill: '#fff', opacity: 0 }, svg);
+
+  await animate(1100, t => {
+    // origin dot fades in early
+    originDot.setAttribute('opacity', Math.min(1, t * 2));
+    // line grows
+    x1Line.setAttribute('opacity', 1);
+    x1Line.setAttribute('x2', ORIGIN.x + (X1_end.x - ORIGIN.x) * t);
+    x1Line.setAttribute('y2', ORIGIN.y + (X1_end.y - ORIGIN.y) * t);
+
+    // header text travels to the tip
+    const hx = headerStart_X1.x + (labelTarget_x1.x - headerStart_X1.x) * t;
+    const hy = headerStart_X1.y + (labelTarget_x1.y - headerStart_X1.y) * t;
+    X1Header.setAttribute('x', hx);
+    X1Header.setAttribute('y', hy);
+    // text shrinks from 26 to a more vector-label size
+    const fs = 26 + (30 - 26) * t;
+    X1Header.setAttribute('font-size', fs);
+    // and change text-anchor smoothly: start as 'middle', end as 'start'
+    if (t > 0.6) X1Header.setAttribute('text-anchor', 'start');
+
+    // cells converge to the tip and fade out
+    X1Cells.forEach((cell, idx) => {
+      const startX = tableX + cols.indexOf('X1') * colW + colW / 2;
+      const startY = tableY + headerH + idx * rowH + rowH / 2 + 8;
+      const cx = startX + (X1_end.x - startX) * t;
+      const cy = startY + (X1_end.y - startY) * t;
+      cell.setAttribute('x', cx);
+      cell.setAttribute('y', cy);
+      cell.setAttribute('opacity', 1 - t);
+    });
+  });
+
+  // Replace the morphed header text with 'x₁'
+  X1Header.textContent = 'Col(X₁)';
+
+  // Add an arrowhead to the now-grown line
+  const x1ArrowHead = (() => {
+    const dx = X1_end.x - ORIGIN.x, dy = X1_end.y - ORIGIN.y;
+    const len = Math.hypot(dx, dy);
+    const ux = dx / len, uy = dy / len;
+    const head = 14;
+    const hx = X1_end.x - ux * head, hy = X1_end.y - uy * head;
+    const px = -uy, py = ux;
+    const w = 6;
+    return el('polygon', {
+      points: `${X1_end.x},${X1_end.y} ${hx + px*w},${hy + py*w} ${hx - px*w},${hy - py*w}`,
+      fill: COLORS.comp, opacity: 0
+    }, svg);
+  })();
+  await animate(200, t => x1ArrowHead.setAttribute('opacity', t));
+
+  await delay(300);
+
+  // -----------------------------------------------------------
+  // MORPH PHASE 2 — warmth column → x₂ vector
+  // -----------------------------------------------------------
+  const X2Header = headerNodes.X2;
+  const X2Cells = TABLE_DATA.map((_, i) => cellNodes[i].X2);
+  const headerStart_X2 = {
+    x: tableX + cols.indexOf('X2') * colW + colW / 2,
+    y: tableY + headerH / 2 + 8
+  };
+  const labelTarget_x2 = { x: X2_end.x - 110, y: X2_end.y - 4 };
+
+  const x2Line = el('line', {
+    x1: ORIGIN.x, y1: ORIGIN.y, x2: ORIGIN.x, y2: ORIGIN.y,
+    stroke: COLORS.x2, 'stroke-width': 3, 'stroke-linecap': 'round', opacity: 0
+  }, svg);
+
+  await animate(1100, t => {
+    x2Line.setAttribute('opacity', 1);
+    x2Line.setAttribute('x2', ORIGIN.x + (X2_end.x - ORIGIN.x) * t);
+    x2Line.setAttribute('y2', ORIGIN.y + (X2_end.y - ORIGIN.y) * t);
+
+    const hx = headerStart_X2.x + (labelTarget_x2.x - headerStart_X2.x) * t;
+    const hy = headerStart_X2.y + (labelTarget_x2.y - headerStart_X2.y) * t;
+    X2Header.setAttribute('x', hx);
+    X2Header.setAttribute('y', hy);
+    const fs = 26 + (30 - 26) * t;
+    X2Header.setAttribute('font-size', fs);
+    if (t > 0.6) X2Header.setAttribute('text-anchor', 'start');
+
+    X2Cells.forEach((cell, idx) => {
+      const startX = tableX + cols.indexOf('X2') * colW + colW / 2;
+      const startY = tableY + headerH + idx * rowH + rowH / 2 + 8;
+      const cx = startX + (X2_end.x - startX) * t;
+      const cy = startY + (X2_end.y - startY) * t;
+      cell.setAttribute('x', cx);
+      cell.setAttribute('y', cy);
+      cell.setAttribute('opacity', 1 - t);
+    });
+  });
+
+  X2Header.textContent = 'Col(X₂)';
+
+  const x2ArrowHead = (() => {
+    const dx = X2_end.x - ORIGIN.x, dy = X2_end.y - ORIGIN.y;
+    const len = Math.hypot(dx, dy);
+    const ux = dx / len, uy = dy / len;
+    const head = 14;
+    const hx = X2_end.x - ux * head, hy = X2_end.y - uy * head;
+    const px = -uy, py = ux;
+    const w = 6;
+    return el('polygon', {
+      points: `${X2_end.x},${X2_end.y} ${hx + px*w},${hy + py*w} ${hx - px*w},${hy - py*w}`,
+      fill: COLORS.x2, opacity: 0
+    }, svg);
+  })();
+  await animate(200, t => x2ArrowHead.setAttribute('opacity', t));
+
+  await delay(300);
+
+  // -----------------------------------------------------------
+  // FADE OUT remaining table elements (id, y columns and their cells)
+  // and the header underline. Then draw the column-space ray extensions.
+  // -----------------------------------------------------------
+  const fadeNodes = [
+    headerNodes.id, headerNodes.y, underline,
+    ...TABLE_DATA.flatMap((_, i) => [cellNodes[i].id, cellNodes[i].y])
+  ];
+  await animate(500, t => {
+    fadeNodes.forEach(n => n.setAttribute('opacity', 1 - t));
+  });
+  fadeNodes.forEach(n => n.remove());
+
+  // Draw the column-space ray extensions (faint lines through origin)
+  const farX1 = vec(x1_angle, x1_len + 2.5);
+  const nearX1 = vec(x1_angle, -1.5);
+  const farX2 = vec(x2_angle, x2_len + 2.5);
+  const nearX2 = vec(x2_angle, -1.5);
+
+  const rayX1 = el('line', {
+    x1: nearX1.x, y1: nearX1.y, x2: farX1.x, y2: farX1.y,
+    stroke: COLORS.comp, 'stroke-width': 1.2, opacity: 0
+  }, svg);
+  const rayX2 = el('line', {
+    x1: nearX2.x, y1: nearX2.y, x2: farX2.x, y2: farX2.y,
+    stroke: COLORS.x2, 'stroke-width': 1.2, opacity: 0
+  }, svg);
+
+  await animate(600, t => {
+    rayX1.setAttribute('opacity', t * 0.45);
+    rayX2.setAttribute('opacity', t * 0.45);
+  });
+
+  // Angle arc to highlight non-orthogonality
+  const arcR = 60;
+  const arcStart = { x: ORIGIN.x + Math.cos(x1_angle) * arcR, y: ORIGIN.y + Math.sin(x1_angle) * arcR };
+  const arcEnd = { x: ORIGIN.x + Math.cos(x2_angle) * arcR, y: ORIGIN.y + Math.sin(x2_angle) * arcR };
+  const arc = el('path', {
+    d: `M ${arcStart.x} ${arcStart.y} A ${arcR} ${arcR} 0 0 0 ${arcEnd.x} ${arcEnd.y}`,
+    fill: 'none', stroke: '#fff', 'stroke-width': 1.5, opacity: 0
+  }, svg);
+  const midAngle = (x1_angle + x2_angle) / 2;
+  const labelPos = { x: ORIGIN.x + Math.cos(midAngle) * (arcR + 24), y: ORIGIN.y + Math.sin(midAngle) * (arcR + 24) };
+  const angleTxt = text(svg, labelPos.x - 12, labelPos.y + 6, '52°', '#fff', 18, false, 400);
+  angleTxt.setAttribute('opacity', 0);
+  await animate(400, t => {
+    arc.setAttribute('opacity', t * 0.8);
+    angleTxt.setAttribute('opacity', t);
+  });
+}
+
+/* =========================================================
+   SLIDE 3 — y appears
+   ========================================================= */
+async function renderSlide3() {
+  const svg = document.getElementById('svg3');
+  clear(svg);
+  // Reuse the static scene from slide 2
+  await renderSlide2static(svg);
+
+  // y vector grows in
+  let yArrow = null;
+  await animate(700, t => {
+    if (yArrow) yArrow.remove();
+    yArrow = arrow(svg, ORIGIN.x, ORIGIN.y,
+      ORIGIN.x + (Y_end.x - ORIGIN.x) * t,
+      ORIGIN.y + (Y_end.y - ORIGIN.y) * t,
+      COLORS.y, 3.5, 1);
+  });
+  const yLabel = text(svg, Y_end.x + 14, Y_end.y + 6, 'y', COLORS.y, 32, true, 500);
+  yLabel.setAttribute('opacity', 0);
+  await animate(300, t => yLabel.setAttribute('opacity', t));
+}
+
+// static version of slide 2 scene (no animation) used as backdrop for later slides
+function renderSlide2static(svg) {
+  const farX1 = vec(x1_angle, x1_len + 2.5);
+  const farX2 = vec(x2_angle, x2_len + 2.5);
+  const nearX1 = vec(x1_angle, -1.5);
+  const nearX2 = vec(x2_angle, -1.5);
+  line(svg, nearX1.x, nearX1.y, farX1.x, farX1.y, COLORS.x1, 1.2, 0.45);
+  line(svg, nearX2.x, nearX2.y, farX2.x, farX2.y, COLORS.x2, 1.2, 0.45);
+  el('circle', { cx: ORIGIN.x, cy: ORIGIN.y, r: 4, fill: '#fff' }, svg);
+  arrow(svg, ORIGIN.x, ORIGIN.y, X1_end.x, X1_end.y, COLORS.x1, 3);
+  arrow(svg, ORIGIN.x, ORIGIN.y, X2_end.x, X2_end.y, COLORS.x2, 3);
+  text(svg, X1_end.x + 14, X1_end.y + 8, 'Col(X₁)', COLORS.x1, 30, true, 500);
+  text(svg, X2_end.x - 110, X2_end.y - 4, 'Col(X₂)', COLORS.x2, 30, true, 500);
+
+  // Angle arc at origin between x₁ and x₂ — flags the non-orthogonal geometry.
+  const arcR = 60;
+  const arcStart = { x: ORIGIN.x + Math.cos(x1_angle) * arcR, y: ORIGIN.y + Math.sin(x1_angle) * arcR };
+  const arcEnd   = { x: ORIGIN.x + Math.cos(x2_angle) * arcR, y: ORIGIN.y + Math.sin(x2_angle) * arcR };
+  el('path', {
+    d: `M ${arcStart.x} ${arcStart.y} A ${arcR} ${arcR} 0 0 0 ${arcEnd.x} ${arcEnd.y}`,
+    fill: 'none', stroke: '#fff', 'stroke-width': 1.5, opacity: 0.75
+  }, svg);
+  const midAngle = (x1_angle + x2_angle) / 2;
+  const labelPos = { x: ORIGIN.x + Math.cos(midAngle) * (arcR + 28), y: ORIGIN.y + Math.sin(midAngle) * (arcR + 28) };
+  const ang = text(svg, labelPos.x - 14, labelPos.y + 6, '52°', '#fff', 18, false, 500);
+  ang.setAttribute('text-anchor', 'start');
+  const subt = text(svg, 96, 752, '(non-orthogonal)', '#888', 15, true, 400);
+  subt.setAttribute('text-anchor', 'start');
+}
+
+function renderSlide3static(svg) {
+  renderSlide2static(svg);
+  arrow(svg, ORIGIN.x, ORIGIN.y, Y_end.x, Y_end.y, COLORS.y, 3.5);
+  text(svg, Y_end.x + 14, Y_end.y + 6, 'y', COLORS.y, 32, true, 500);
+}
+
+/* =========================================================
+   SLIDE 4 — project y onto x1 and x2 separately, mark RED
+   We drop perpendiculars from y onto each x-axis line in turn and
+   highlight the resulting projection segments in red. These are the
+   "naive" coefficients you'd get from two separate simple regressions
+   of y on x1 and y on x2: β̃₁x₁ and β̃₂x₂.
+   ========================================================= */
+async function renderSlide4() {
+  const svg = document.getElementById('svg4');
+  clear(svg);
+  renderSlide3static(svg);
+
+  // --- project onto x1 ---
+  const dash1 = line(svg, Y_end.x, Y_end.y, Y_end.x, Y_end.y, '#888', 1.5, 1, true);
+  await animate(650, t => {
+    dash1.setAttribute('x2', Y_end.x + (FOOT_on_x1.x - Y_end.x) * t);
+    dash1.setAttribute('y2', Y_end.y + (FOOT_on_x1.y - Y_end.y) * t);
+  });
+  rightAngleMark(svg, FOOT_on_x1.x, FOOT_on_x1.y, Y_end.x, Y_end.y,
+    ORIGIN.x + (FOOT_on_x1.x - ORIGIN.x) * 0.6, ORIGIN.y + (FOOT_on_x1.y - ORIGIN.y) * 0.6);
+
+  let red1 = null;
+  await animate(650, t => {
+    if (red1) red1.remove();
+    red1 = el('line', {
+      x1: ORIGIN.x, y1: ORIGIN.y,
+      x2: ORIGIN.x + (FOOT_on_x1.x - ORIGIN.x) * t,
+      y2: ORIGIN.y + (FOOT_on_x1.y - ORIGIN.y) * t,
+      stroke: COLORS.red, 'stroke-width': 6, 'stroke-linecap': 'round'
+    }, svg);
+  });
+  const mid1 = { x: (ORIGIN.x + FOOT_on_x1.x)/2, y: (ORIGIN.y + FOOT_on_x1.y)/2 };
+  const lab1 = text(svg, mid1.x + 10, mid1.y + 30, 'β̃₁ x₁', COLORS.red, 24, true, 500);
+  lab1.setAttribute('opacity', 0);
+  await animate(300, t => lab1.setAttribute('opacity', t));
+
+  await delay(150);
+
+  // --- project onto x2 ---
+  const dash2 = line(svg, Y_end.x, Y_end.y, Y_end.x, Y_end.y, '#888', 1.5, 1, true);
+  await animate(650, t => {
+    dash2.setAttribute('x2', Y_end.x + (FOOT_on_x2.x - Y_end.x) * t);
+    dash2.setAttribute('y2', Y_end.y + (FOOT_on_x2.y - Y_end.y) * t);
+  });
+  rightAngleMark(svg, FOOT_on_x2.x, FOOT_on_x2.y, Y_end.x, Y_end.y,
+    ORIGIN.x + (FOOT_on_x2.x - ORIGIN.x) * 0.6, ORIGIN.y + (FOOT_on_x2.y - ORIGIN.y) * 0.6);
+
+  let red2 = null;
+  await animate(650, t => {
+    if (red2) red2.remove();
+    red2 = el('line', {
+      x1: ORIGIN.x, y1: ORIGIN.y,
+      x2: ORIGIN.x + (FOOT_on_x2.x - ORIGIN.x) * t,
+      y2: ORIGIN.y + (FOOT_on_x2.y - ORIGIN.y) * t,
+      stroke: COLORS.red, 'stroke-width': 6, 'stroke-linecap': 'round'
+    }, svg);
+  });
+  const mid2 = { x: (ORIGIN.x + FOOT_on_x2.x)/2, y: (ORIGIN.y + FOOT_on_x2.y)/2 };
+  const lab2 = text(svg, mid2.x - 95, mid2.y - 5, 'β̃₂ x₂', COLORS.red, 24, true, 500);
+  lab2.setAttribute('opacity', 0);
+  await animate(300, t => lab2.setAttribute('opacity', t));
+}
+
+/* =========================================================
+   SLIDE 5 — parallelogram vector-sum of the two red projections
+   Translate a copy of β̃₂x₂ to the tip of β̃₁x₁ (and a copy of β̃₁x₁
+   to the tip of β̃₂x₂). The opposite corner of the resulting
+   parallelogram is the vector sum β̃₁x₁ + β̃₂x₂. With x₁, x₂ NOT
+   orthogonal, this sum is NOT equal to y — there is a visible gap.
+   This is the high-school parallelogram rule applied to OLS pieces:
+   it fails to reconstruct y unless the two regressors are perpendicular.
+   ========================================================= */
+async function renderSlide5() {
+  const svg = document.getElementById('svg5');
+  clear(svg);
+  renderSlide3static(svg);
+
+  // Faint perpendicular dashes (carried over from slide 4)
+  line(svg, Y_end.x, Y_end.y, FOOT_on_x1.x, FOOT_on_x1.y, '#555', 1.0, 0.5, true);
+  line(svg, Y_end.x, Y_end.y, FOOT_on_x2.x, FOOT_on_x2.y, '#555', 1.0, 0.5, true);
+
+  // The two red projection segments (instant)
+  el('line', {
+    x1: ORIGIN.x, y1: ORIGIN.y, x2: FOOT_on_x1.x, y2: FOOT_on_x1.y,
+    stroke: COLORS.red, 'stroke-width': 6, 'stroke-linecap': 'round'
+  }, svg);
+  el('line', {
+    x1: ORIGIN.x, y1: ORIGIN.y, x2: FOOT_on_x2.x, y2: FOOT_on_x2.y,
+    stroke: COLORS.red, 'stroke-width': 6, 'stroke-linecap': 'round'
+  }, svg);
+  const mid1 = { x: (ORIGIN.x + FOOT_on_x1.x)/2, y: (ORIGIN.y + FOOT_on_x1.y)/2 };
+  const mid2 = { x: (ORIGIN.x + FOOT_on_x2.x)/2, y: (ORIGIN.y + FOOT_on_x2.y)/2 };
+  text(svg, mid1.x + 10, mid1.y + 30, 'β̃₁ x₁', COLORS.red, 24, true, 500);
+  text(svg, mid2.x - 95, mid2.y - 5, 'β̃₂ x₂', COLORS.red, 24, true, 500);
+
+  await delay(400);
+
+  // Parallelogram completion: SUM is the vector sum corner
+  const SUM = {
+    x: FOOT_on_x1.x + (FOOT_on_x2.x - ORIGIN.x),
+    y: FOOT_on_x1.y + (FOOT_on_x2.y - ORIGIN.y)
+  };
+
+  // Translate a copy of β̃₂x₂ from origin → tip of β̃₁x₁
+  const ghost2 = el('line', {
+    x1: ORIGIN.x, y1: ORIGIN.y,
+    x2: FOOT_on_x2.x, y2: FOOT_on_x2.y,
+    stroke: COLORS.red, 'stroke-width': 4, 'stroke-linecap': 'round',
+    opacity: 0.55, 'stroke-dasharray': '8 5'
+  }, svg);
+  await animate(900, t => {
+    const sx = ORIGIN.x + (FOOT_on_x1.x - ORIGIN.x) * t;
+    const sy = ORIGIN.y + (FOOT_on_x1.y - ORIGIN.y) * t;
+    const ex = FOOT_on_x2.x + (SUM.x - FOOT_on_x2.x) * t;
+    const ey = FOOT_on_x2.y + (SUM.y - FOOT_on_x2.y) * t;
+    ghost2.setAttribute('x1', sx);
+    ghost2.setAttribute('y1', sy);
+    ghost2.setAttribute('x2', ex);
+    ghost2.setAttribute('y2', ey);
+  });
+
+  // Translate β̃₁x₁ copy from origin → tip of β̃₂x₂
+  const ghost1 = el('line', {
+    x1: ORIGIN.x, y1: ORIGIN.y,
+    x2: FOOT_on_x1.x, y2: FOOT_on_x1.y,
+    stroke: COLORS.red, 'stroke-width': 4, 'stroke-linecap': 'round',
+    opacity: 0.55, 'stroke-dasharray': '8 5'
+  }, svg);
+  await animate(900, t => {
+    const sx = ORIGIN.x + (FOOT_on_x2.x - ORIGIN.x) * t;
+    const sy = ORIGIN.y + (FOOT_on_x2.y - ORIGIN.y) * t;
+    const ex = FOOT_on_x1.x + (SUM.x - FOOT_on_x1.x) * t;
+    const ey = FOOT_on_x1.y + (SUM.y - FOOT_on_x1.y) * t;
+    ghost1.setAttribute('x1', sx);
+    ghost1.setAttribute('y1', sy);
+    ghost1.setAttribute('x2', ex);
+    ghost1.setAttribute('y2', ey);
+  });
+
+  await delay(150);
+
+  // Mark the SUM corner
+  const sumDot = el('circle', { cx: SUM.x, cy: SUM.y, r: 6, fill: COLORS.red, opacity: 0 }, svg);
+  await animate(300, t => sumDot.setAttribute('opacity', t));
+  const sumLabel = text(svg, SUM.x + 14, SUM.y + 28, 'β̃₁x₁ + β̃₂x₂', COLORS.red, 22, true, 500);
+  sumLabel.setAttribute('opacity', 0);
+  await animate(400, t => sumLabel.setAttribute('opacity', t));
+
+  await delay(300);
+
+  // The GAP: an arrow from SUM to Y_end in warm gold
+  const gapColor = '#FFD24A';
+  let gap = null;
+  await animate(800, t => {
+    if (gap) gap.remove();
+    gap = arrow(svg,
+      SUM.x, SUM.y,
+      SUM.x + (Y_end.x - SUM.x) * t,
+      SUM.y + (Y_end.y - SUM.y) * t,
+      gapColor, 3, 1
+    );
+  });
+  const gapMid = { x: (SUM.x + Y_end.x)/2, y: (SUM.y + Y_end.y)/2 };
+  const gapLabel = text(svg, gapMid.x + 14, gapMid.y - 4, 'gap', gapColor, 22, true, 500);
+  gapLabel.setAttribute('opacity', 0);
+  await animate(400, t => gapLabel.setAttribute('opacity', t));
+}
+
+/* =========================================================
+   SLIDE 6 — orthogonalize x₂, project y again, mark BLUE
+   Animate x₂ rotating to become perpendicular to x₁, then drop
+   perpendiculars from y onto each axis and mark the projection
+   segments β̂₁x₁ and β̂₂x₂ in blue.
+   ========================================================= */
+async function renderSlide6() {
+  const svg = document.getElementById('svg6');
+  clear(svg);
+
+  // x1 axis
+  const farX1 = vec(x1_angle, x1_len + 2.5);
+  const nearX1 = vec(x1_angle, -1.5);
+  line(svg, nearX1.x, nearX1.y, farX1.x, farX1.y, COLORS.x1, 1.2, 0.45);
+  el('circle', { cx: ORIGIN.x, cy: ORIGIN.y, r: 4, fill: '#fff' }, svg);
+  arrow(svg, ORIGIN.x, ORIGIN.y, X1_end.x, X1_end.y, COLORS.x1, 3);
+  text(svg, X1_end.x + 14, X1_end.y + 8, 'Col(X₁)', COLORS.x1, 30, true, 500);
+
+  // x2 starts at original angle and rotates
+  let x2line = el('line', {
+    x1: vec(x2_angle, -1.5).x, y1: vec(x2_angle, -1.5).y,
+    x2: vec(x2_angle, x2_len + 2.5).x, y2: vec(x2_angle, x2_len + 2.5).y,
+    stroke: COLORS.x2, 'stroke-width': 1.2, opacity: 0.45
+  }, svg);
+  let x2arrow = arrow(svg, ORIGIN.x, ORIGIN.y, X2_end.x, X2_end.y, COLORS.x2, 3);
+  let x2label = text(svg, X2_end.x - 110, X2_end.y - 4, 'Col(X₂)', COLORS.x2, 30, true, 500);
+
+  // y
+  arrow(svg, ORIGIN.x, ORIGIN.y, Y_end.x, Y_end.y, COLORS.y, 3.5);
+  text(svg, Y_end.x + 14, Y_end.y + 6, 'y', COLORS.y, 32, true, 500);
+
+  await delay(300);
+
+  // Rotate x2 to x2_ortho_angle
+  await animate(1100, t => {
+    const a = x2_angle + (x2_ortho_angle - x2_angle) * t;
+    const near = vec(a, -1.5), far = vec(a, x2_len + 2.5);
+    const end = vec(a, x2_len);
+    x2line.setAttribute('x1', near.x);
+    x2line.setAttribute('y1', near.y);
+    x2line.setAttribute('x2', far.x);
+    x2line.setAttribute('y2', far.y);
+    x2arrow.remove();
+    x2arrow = arrow(svg, ORIGIN.x, ORIGIN.y, end.x, end.y, COLORS.x2, 3);
+    x2label.setAttribute('x', end.x - 110);
+    x2label.setAttribute('y', end.y - 4);
+  });
+
+  // Right-angle marker
+  const ra_size = 18;
+  const ax = X1_dir.ux * ra_size, ay = X1_dir.uy * ra_size;
+  const bx = Math.cos(x2_ortho_angle) * ra_size, by = Math.sin(x2_ortho_angle) * ra_size;
+  const ra = el('polyline', {
+    points: `${ORIGIN.x + ax},${ORIGIN.y + ay} ${ORIGIN.x + ax + bx},${ORIGIN.y + ay + by} ${ORIGIN.x + bx},${ORIGIN.y + by}`,
+    fill: 'none', stroke: '#fff', 'stroke-width': 1.5, opacity: 0
+  }, svg);
+  await animate(300, t => ra.setAttribute('opacity', t * 0.8));
+
+  await delay(150);
+
+  // Drop perpendicular to x1
+  const dash1 = line(svg, Y_end.x, Y_end.y, Y_end.x, Y_end.y, '#888', 1.5, 1, true);
+  await animate(600, t => {
+    dash1.setAttribute('x2', Y_end.x + (FOOT_on_x1_ortho.x - Y_end.x) * t);
+    dash1.setAttribute('y2', Y_end.y + (FOOT_on_x1_ortho.y - Y_end.y) * t);
+  });
+  rightAngleMark(svg, FOOT_on_x1_ortho.x, FOOT_on_x1_ortho.y, Y_end.x, Y_end.y,
+    ORIGIN.x + (FOOT_on_x1_ortho.x - ORIGIN.x) * 0.6, ORIGIN.y + (FOOT_on_x1_ortho.y - ORIGIN.y) * 0.6);
+  let blue1 = null;
+  await animate(600, t => {
+    if (blue1) blue1.remove();
+    blue1 = el('line', {
+      x1: ORIGIN.x, y1: ORIGIN.y,
+      x2: ORIGIN.x + (FOOT_on_x1_ortho.x - ORIGIN.x) * t,
+      y2: ORIGIN.y + (FOOT_on_x1_ortho.y - ORIGIN.y) * t,
+      stroke: COLORS.blue, 'stroke-width': 6, 'stroke-linecap': 'round'
+    }, svg);
+  });
+  const mid1 = { x: (ORIGIN.x + FOOT_on_x1_ortho.x)/2, y: (ORIGIN.y + FOOT_on_x1_ortho.y)/2 };
+  const lab1 = text(svg, mid1.x + 10, mid1.y + 30, 'β̂₁ x₁', COLORS.blue, 24, true, 500);
+  lab1.setAttribute('opacity', 0);
+  await animate(300, t => lab1.setAttribute('opacity', t));
+
+  // Drop perpendicular to x2_ortho
+  const dash2 = line(svg, Y_end.x, Y_end.y, Y_end.x, Y_end.y, '#888', 1.5, 1, true);
+  await animate(600, t => {
+    dash2.setAttribute('x2', Y_end.x + (FOOT_on_x2_ortho.x - Y_end.x) * t);
+    dash2.setAttribute('y2', Y_end.y + (FOOT_on_x2_ortho.y - Y_end.y) * t);
+  });
+  rightAngleMark(svg, FOOT_on_x2_ortho.x, FOOT_on_x2_ortho.y, Y_end.x, Y_end.y,
+    ORIGIN.x + (FOOT_on_x2_ortho.x - ORIGIN.x) * 0.6, ORIGIN.y + (FOOT_on_x2_ortho.y - ORIGIN.y) * 0.6);
+  let blue2 = null;
+  await animate(600, t => {
+    if (blue2) blue2.remove();
+    blue2 = el('line', {
+      x1: ORIGIN.x, y1: ORIGIN.y,
+      x2: ORIGIN.x + (FOOT_on_x2_ortho.x - ORIGIN.x) * t,
+      y2: ORIGIN.y + (FOOT_on_x2_ortho.y - ORIGIN.y) * t,
+      stroke: COLORS.blue, 'stroke-width': 6, 'stroke-linecap': 'round'
+    }, svg);
+  });
+  const mid2 = { x: (ORIGIN.x + FOOT_on_x2_ortho.x)/2, y: (ORIGIN.y + FOOT_on_x2_ortho.y)/2 };
+  const lab2 = text(svg, mid2.x + 14, mid2.y - 6, 'β̂₂ x₂', COLORS.blue, 24, true, 500);
+  lab2.setAttribute('opacity', 0);
+  await animate(300, t => lab2.setAttribute('opacity', t));
+}
+
+/* =========================================================
+   SLIDE 7 — parallelogram (= rectangle) of the BLUE projections
+   With x₁ ⊥ x₂ the parallelogram is a rectangle, and the vector sum
+   β̂₁x₁ + β̂₂x₂ lands EXACTLY on y. Projection-then-sum reconstructs y.
+   ========================================================= */
+async function renderSlide7() {
+  const svg = document.getElementById('svg7');
+  clear(svg);
+
+  // Orthogonal scene with y
+  const farX1 = vec(x1_angle, x1_len + 2.5);
+  const nearX1 = vec(x1_angle, -1.5);
+  const farX2o = vec(x2_ortho_angle, x2_len + 2.5);
+  const nearX2o = vec(x2_ortho_angle, -1.5);
+  line(svg, nearX1.x, nearX1.y, farX1.x, farX1.y, COLORS.x1, 1.2, 0.45);
+  line(svg, nearX2o.x, nearX2o.y, farX2o.x, farX2o.y, COLORS.x2, 1.2, 0.45);
+  el('circle', { cx: ORIGIN.x, cy: ORIGIN.y, r: 4, fill: '#fff' }, svg);
+  arrow(svg, ORIGIN.x, ORIGIN.y, X1_end.x, X1_end.y, COLORS.x1, 3);
+  const X2o_end = vec(x2_ortho_angle, x2_len);
+  arrow(svg, ORIGIN.x, ORIGIN.y, X2o_end.x, X2o_end.y, COLORS.x2, 3);
+  text(svg, X1_end.x + 14, X1_end.y + 8, 'Col(X₁)', COLORS.x1, 30, true, 500);
+  text(svg, X2o_end.x - 110, X2o_end.y - 4, 'Col(X₂)', COLORS.x2, 30, true, 500);
+
+  // right angle
+  const ra_size = 18;
+  const ax = X1_dir.ux * ra_size, ay = X1_dir.uy * ra_size;
+  const bx = Math.cos(x2_ortho_angle) * ra_size, by = Math.sin(x2_ortho_angle) * ra_size;
+  el('polyline', {
+    points: `${ORIGIN.x + ax},${ORIGIN.y + ay} ${ORIGIN.x + ax + bx},${ORIGIN.y + ay + by} ${ORIGIN.x + bx},${ORIGIN.y + by}`,
+    fill: 'none', stroke: '#fff', 'stroke-width': 1.5, opacity: 0.8
+  }, svg);
+  arrow(svg, ORIGIN.x, ORIGIN.y, Y_end.x, Y_end.y, COLORS.y, 3.5);
+  text(svg, Y_end.x + 14, Y_end.y + 6, 'y', COLORS.y, 32, true, 500);
+
+  // Faint perp dashes
+  line(svg, Y_end.x, Y_end.y, FOOT_on_x1_ortho.x, FOOT_on_x1_ortho.y, '#555', 1.0, 0.5, true);
+  line(svg, Y_end.x, Y_end.y, FOOT_on_x2_ortho.x, FOOT_on_x2_ortho.y, '#555', 1.0, 0.5, true);
+  // Two blue projections (instant)
+  el('line', {
+    x1: ORIGIN.x, y1: ORIGIN.y, x2: FOOT_on_x1_ortho.x, y2: FOOT_on_x1_ortho.y,
+    stroke: COLORS.blue, 'stroke-width': 6, 'stroke-linecap': 'round'
+  }, svg);
+  el('line', {
+    x1: ORIGIN.x, y1: ORIGIN.y, x2: FOOT_on_x2_ortho.x, y2: FOOT_on_x2_ortho.y,
+    stroke: COLORS.blue, 'stroke-width': 6, 'stroke-linecap': 'round'
+  }, svg);
+  const mid1 = { x: (ORIGIN.x + FOOT_on_x1_ortho.x)/2, y: (ORIGIN.y + FOOT_on_x1_ortho.y)/2 };
+  const mid2 = { x: (ORIGIN.x + FOOT_on_x2_ortho.x)/2, y: (ORIGIN.y + FOOT_on_x2_ortho.y)/2 };
+  text(svg, mid1.x + 10, mid1.y + 30, 'β̂₁ x₁', COLORS.blue, 24, true, 500);
+  text(svg, mid2.x + 14, mid2.y - 6, 'β̂₂ x₂', COLORS.blue, 24, true, 500);
+
+  await delay(400);
+
+  // Parallelogram (now a rectangle): translate copies
+  const SUM = {
+    x: FOOT_on_x1_ortho.x + (FOOT_on_x2_ortho.x - ORIGIN.x),
+    y: FOOT_on_x1_ortho.y + (FOOT_on_x2_ortho.y - ORIGIN.y)
+  };
+
+  const ghost2 = el('line', {
+    x1: ORIGIN.x, y1: ORIGIN.y, x2: FOOT_on_x2_ortho.x, y2: FOOT_on_x2_ortho.y,
+    stroke: COLORS.blue, 'stroke-width': 4, 'stroke-linecap': 'round',
+    opacity: 0.55, 'stroke-dasharray': '8 5'
+  }, svg);
+  await animate(900, t => {
+    const sx = ORIGIN.x + (FOOT_on_x1_ortho.x - ORIGIN.x) * t;
+    const sy = ORIGIN.y + (FOOT_on_x1_ortho.y - ORIGIN.y) * t;
+    const ex = FOOT_on_x2_ortho.x + (SUM.x - FOOT_on_x2_ortho.x) * t;
+    const ey = FOOT_on_x2_ortho.y + (SUM.y - FOOT_on_x2_ortho.y) * t;
+    ghost2.setAttribute('x1', sx);
+    ghost2.setAttribute('y1', sy);
+    ghost2.setAttribute('x2', ex);
+    ghost2.setAttribute('y2', ey);
+  });
+
+  const ghost1 = el('line', {
+    x1: ORIGIN.x, y1: ORIGIN.y, x2: FOOT_on_x1_ortho.x, y2: FOOT_on_x1_ortho.y,
+    stroke: COLORS.blue, 'stroke-width': 4, 'stroke-linecap': 'round',
+    opacity: 0.55, 'stroke-dasharray': '8 5'
+  }, svg);
+  await animate(900, t => {
+    const sx = ORIGIN.x + (FOOT_on_x2_ortho.x - ORIGIN.x) * t;
+    const sy = ORIGIN.y + (FOOT_on_x2_ortho.y - ORIGIN.y) * t;
+    const ex = FOOT_on_x1_ortho.x + (SUM.x - FOOT_on_x1_ortho.x) * t;
+    const ey = FOOT_on_x1_ortho.y + (SUM.y - FOOT_on_x1_ortho.y) * t;
+    ghost1.setAttribute('x1', sx);
+    ghost1.setAttribute('y1', sy);
+    ghost1.setAttribute('x2', ex);
+    ghost1.setAttribute('y2', ey);
+  });
+
+  await delay(200);
+
+  // Pulse a ring at the SUM corner (which coincides with Y_end)
+  const ring = el('circle', {
+    cx: SUM.x, cy: SUM.y, r: 4, fill: 'none',
+    stroke: '#FFD24A', 'stroke-width': 0, opacity: 1
+  }, svg);
+  await animate(800, t => {
+    ring.setAttribute('r', 4 + 28 * t);
+    ring.setAttribute('stroke-width', (1 - t) * 5);
+    ring.setAttribute('opacity', 1 - t);
+  });
+
+  const sumLabel = text(svg, SUM.x + 22, SUM.y - 14, 'β̂₁x₁ + β̂₂x₂  =  y', '#FFD24A', 24, true, 500);
+  sumLabel.setAttribute('opacity', 0);
+  await animate(500, t => sumLabel.setAttribute('opacity', t));
+}
+
+/* =========================================================
+   SLIDE 8 — y always decomposes as β̂₁x₁ + β̂₂x₂
+   The point: even when x₁ and x₂ aren't orthogonal, there's still a
+   UNIQUE pair (β̂₁, β̂₂) such that β̂₁x₁ + β̂₂x₂ = y. Find them
+   geometrically by sliding from the tip of y along lines parallel to
+   each axis: the line through y parallel to x₂ hits the x₁ axis at
+   β̂₁ x₁; the line through y parallel to x₁ hits the x₂ axis at β̂₂ x₂.
+   These are the joint OLS coefficients — NOT the simple projections.
+   ========================================================= */
+// Joint-OLS coefficients (from solving β̂₁ x₁ + β̂₂ x₂ = y in the plane).
+const _sin_x2_minus_x1 = Math.sin(x2_angle - x1_angle);
+const beta1_hat = y_len * Math.sin(x2_angle - y_angle) / _sin_x2_minus_x1;
+const beta2_hat = y_len * Math.sin(y_angle - x1_angle) / _sin_x2_minus_x1;
+const FOOT_b1 = vec(x1_angle, beta1_hat);
+const FOOT_b2 = vec(x2_angle, beta2_hat);
+
+async function renderSlide8() {
+  const svg = document.getElementById('svg8');
+  clear(svg);
+  renderSlide3static(svg);
+
+  await delay(300);
+
+  // Guide line from y parallel to x2 — hits the x1 axis at FOOT_b1
+  const guide1 = el('line', {
+    x1: Y_end.x, y1: Y_end.y, x2: Y_end.x, y2: Y_end.y,
+    stroke: '#888', 'stroke-width': 1.5, 'stroke-linecap': 'round',
+    'stroke-dasharray': '6 5'
+  }, svg);
+  await animate(700, t => {
+    guide1.setAttribute('x2', Y_end.x + (FOOT_b1.x - Y_end.x) * t);
+    guide1.setAttribute('y2', Y_end.y + (FOOT_b1.y - Y_end.y) * t);
+  });
+
+  // BLUE β̂₁ x₁ segment from origin to FOOT_b1
+  let blue1 = null;
+  await animate(700, t => {
+    if (blue1) blue1.remove();
+    blue1 = el('line', {
+      x1: ORIGIN.x, y1: ORIGIN.y,
+      x2: ORIGIN.x + (FOOT_b1.x - ORIGIN.x) * t,
+      y2: ORIGIN.y + (FOOT_b1.y - ORIGIN.y) * t,
+      stroke: COLORS.blue, 'stroke-width': 7, 'stroke-linecap': 'round'
+    }, svg);
+  });
+  const lb1Mid = { x: (ORIGIN.x + FOOT_b1.x)/2, y: (ORIGIN.y + FOOT_b1.y)/2 };
+  const lb1 = text(svg, lb1Mid.x + 10, lb1Mid.y + 32, 'β̂₁ x₁', COLORS.blue, 28, true, 500);
+  lb1.setAttribute('opacity', 0);
+  await animate(300, t => lb1.setAttribute('opacity', t));
+
+  await delay(250);
+
+  // Guide line from y parallel to x1 — hits the x2 axis at FOOT_b2
+  const guide2 = el('line', {
+    x1: Y_end.x, y1: Y_end.y, x2: Y_end.x, y2: Y_end.y,
+    stroke: '#888', 'stroke-width': 1.5, 'stroke-linecap': 'round',
+    'stroke-dasharray': '6 5'
+  }, svg);
+  await animate(700, t => {
+    guide2.setAttribute('x2', Y_end.x + (FOOT_b2.x - Y_end.x) * t);
+    guide2.setAttribute('y2', Y_end.y + (FOOT_b2.y - Y_end.y) * t);
+  });
+
+  // BLUE β̂₂ x₂ segment from origin to FOOT_b2
+  let blue2 = null;
+  await animate(700, t => {
+    if (blue2) blue2.remove();
+    blue2 = el('line', {
+      x1: ORIGIN.x, y1: ORIGIN.y,
+      x2: ORIGIN.x + (FOOT_b2.x - ORIGIN.x) * t,
+      y2: ORIGIN.y + (FOOT_b2.y - ORIGIN.y) * t,
+      stroke: COLORS.blue, 'stroke-width': 7, 'stroke-linecap': 'round'
+    }, svg);
+  });
+  const lb2Mid = { x: (ORIGIN.x + FOOT_b2.x)/2, y: (ORIGIN.y + FOOT_b2.y)/2 };
+  const lb2 = text(svg, lb2Mid.x - 95, lb2Mid.y - 5, 'β̂₂ x₂', COLORS.blue, 28, true, 500);
+  lb2.setAttribute('opacity', 0);
+  await animate(300, t => lb2.setAttribute('opacity', t));
+
+  await delay(300);
+
+  // Pulse a ring at y where the parallelogram closes
+  const ring = el('circle', {
+    cx: Y_end.x, cy: Y_end.y, r: 4, fill: 'none',
+    stroke: '#FFD24A', 'stroke-width': 0, opacity: 1
+  }, svg);
+  await animate(900, t => {
+    ring.setAttribute('r', 4 + 32 * t);
+    ring.setAttribute('stroke-width', (1 - t) * 5);
+    ring.setAttribute('opacity', 1 - t);
+  });
+}
+
+/* =========================================================
+   SLIDE 9 — β̃ vs β̂: simple projections give wrong lengths
+   Same non-orthogonal scene. Draw the blue β̂ segments first
+   (the true joint-OLS decomposition that closes on y), then
+   overlay the red β̃ segments (the simple projections) along
+   the same axes. The red overshoots the blue along each axis —
+   simple projections are *longer* than the true coefficients
+   when the regressors are correlated this way.
+   ========================================================= */
+async function renderSlide9() {
+  const svg = document.getElementById('svg9');
+  clear(svg);
+  renderSlide3static(svg);
+
+  // The blue β̂ decomposition (already proven on the previous slide)
+  // Draw it lightly so the red overlay reads clearly.
+  line(svg, FOOT_b1.x, FOOT_b1.y, Y_end.x, Y_end.y, COLORS.blue, 1.5, 0.45, true);
+  line(svg, FOOT_b2.x, FOOT_b2.y, Y_end.x, Y_end.y, COLORS.blue, 1.5, 0.45, true);
+  el('line', { x1: ORIGIN.x, y1: ORIGIN.y, x2: FOOT_b1.x, y2: FOOT_b1.y,
+    stroke: COLORS.blue, 'stroke-width': 7, 'stroke-linecap': 'round' }, svg);
+  el('line', { x1: ORIGIN.x, y1: ORIGIN.y, x2: FOOT_b2.x, y2: FOOT_b2.y,
+    stroke: COLORS.blue, 'stroke-width': 7, 'stroke-linecap': 'round' }, svg);
+  const lb1Mid = { x: (ORIGIN.x + FOOT_b1.x)/2, y: (ORIGIN.y + FOOT_b1.y)/2 };
+  const lb2Mid = { x: (ORIGIN.x + FOOT_b2.x)/2, y: (ORIGIN.y + FOOT_b2.y)/2 };
+  text(svg, lb1Mid.x + 10, lb1Mid.y + 32, 'β̂₁ x₁', COLORS.blue, 24, true, 500);
+  text(svg, lb2Mid.x - 90, lb2Mid.y - 5, 'β̂₂ x₂', COLORS.blue, 24, true, 500);
+
+  await delay(500);
+
+  // ---- Drop perpendicular onto x1 (simple projection — gives β̃₁) ----
+  const dash1 = line(svg, Y_end.x, Y_end.y, Y_end.x, Y_end.y, '#888', 1.5, 1, true);
+  await animate(600, t => {
+    dash1.setAttribute('x2', Y_end.x + (FOOT_on_x1.x - Y_end.x) * t);
+    dash1.setAttribute('y2', Y_end.y + (FOOT_on_x1.y - Y_end.y) * t);
+  });
+  rightAngleMark(svg, FOOT_on_x1.x, FOOT_on_x1.y, Y_end.x, Y_end.y,
+    ORIGIN.x + (FOOT_on_x1.x - ORIGIN.x) * 0.6, ORIGIN.y + (FOOT_on_x1.y - ORIGIN.y) * 0.6);
+
+  // Red β̃ segment — sits ON the x1 axis, thinner than blue so blue still shows
+  // through where they overlap (origin → β̂₁ foot). The portion past β̂₁ foot is
+  // pure red — visible "extra length" of the simple projection.
+  let red1 = null;
+  await animate(700, t => {
+    if (red1) red1.remove();
+    red1 = el('line', {
+      x1: ORIGIN.x, y1: ORIGIN.y,
+      x2: ORIGIN.x + (FOOT_on_x1.x - ORIGIN.x) * t,
+      y2: ORIGIN.y + (FOOT_on_x1.y - ORIGIN.y) * t,
+      stroke: COLORS.red, 'stroke-width': 3, 'stroke-linecap': 'round'
+    }, svg);
+  });
+  // Dot at β̃ end, label past the end
+  el('circle', { cx: FOOT_on_x1.x, cy: FOOT_on_x1.y, r: 5, fill: COLORS.red }, svg);
+  const lr1 = text(svg, FOOT_on_x1.x + 14, FOOT_on_x1.y + 10, 'β̃₁ x₁', COLORS.red, 24, true, 500);
+  lr1.setAttribute('opacity', 0);
+  await animate(300, t => lr1.setAttribute('opacity', t));
+
+  await delay(200);
+
+  // ---- Drop perpendicular onto x2 (simple projection — gives β̃₂) ----
+  const dash2 = line(svg, Y_end.x, Y_end.y, Y_end.x, Y_end.y, '#888', 1.5, 1, true);
+  await animate(600, t => {
+    dash2.setAttribute('x2', Y_end.x + (FOOT_on_x2.x - Y_end.x) * t);
+    dash2.setAttribute('y2', Y_end.y + (FOOT_on_x2.y - Y_end.y) * t);
+  });
+  rightAngleMark(svg, FOOT_on_x2.x, FOOT_on_x2.y, Y_end.x, Y_end.y,
+    ORIGIN.x + (FOOT_on_x2.x - ORIGIN.x) * 0.6, ORIGIN.y + (FOOT_on_x2.y - ORIGIN.y) * 0.6);
+
+  let red2 = null;
+  await animate(700, t => {
+    if (red2) red2.remove();
+    red2 = el('line', {
+      x1: ORIGIN.x, y1: ORIGIN.y,
+      x2: ORIGIN.x + (FOOT_on_x2.x - ORIGIN.x) * t,
+      y2: ORIGIN.y + (FOOT_on_x2.y - ORIGIN.y) * t,
+      stroke: COLORS.red, 'stroke-width': 3, 'stroke-linecap': 'round'
+    }, svg);
+  });
+  el('circle', { cx: FOOT_on_x2.x, cy: FOOT_on_x2.y, r: 5, fill: COLORS.red }, svg);
+  const lr2 = text(svg, FOOT_on_x2.x - 100, FOOT_on_x2.y - 14, 'β̃₂ x₂', COLORS.red, 24, true, 500);
+  lr2.setAttribute('opacity', 0);
+  await animate(300, t => lr2.setAttribute('opacity', t));
+
+  await delay(300);
+
+  // Highlight the discrepancy with a callout brace on the x1 axis
+  // from FOOT_b1 to FOOT_on_x1 — the "extra length" simple projection adds.
+  const gapMid_x1 = {
+    x: (FOOT_b1.x + FOOT_on_x1.x) / 2,
+    y: (FOOT_b1.y + FOOT_on_x1.y) / 2
+  };
+  // Perpendicular offset for the bracket
+  const px = -Math.sin(x1_angle), py = Math.cos(x1_angle);
+  const off = 28;
+  const bracketStart = { x: FOOT_b1.x + px * off, y: FOOT_b1.y + py * off };
+  const bracketEnd   = { x: FOOT_on_x1.x + px * off, y: FOOT_on_x1.y + py * off };
+  const bracketUp1   = { x: FOOT_b1.x + px * (off * 0.6), y: FOOT_b1.y + py * (off * 0.6) };
+  const bracketUp2   = { x: FOOT_on_x1.x + px * (off * 0.6), y: FOOT_on_x1.y + py * (off * 0.6) };
+  const brace = el('polyline', {
+    points: `${bracketUp1.x},${bracketUp1.y} ${bracketStart.x},${bracketStart.y} ${bracketEnd.x},${bracketEnd.y} ${bracketUp2.x},${bracketUp2.y}`,
+    fill: 'none', stroke: '#FFD24A', 'stroke-width': 1.6, opacity: 0
+  }, svg);
+  await animate(500, t => brace.setAttribute('opacity', t * 0.9));
+  const diffLab = text(svg,
+    (bracketStart.x + bracketEnd.x)/2 + px*16,
+    (bracketStart.y + bracketEnd.y)/2 + py*16 + 6,
+    'β̃ − β̂', '#FFD24A', 20, true, 500);
+  diffLab.setAttribute('text-anchor', 'middle');
+  diffLab.setAttribute('opacity', 0);
+  await animate(400, t => diffLab.setAttribute('opacity', t));
+}
+
+/* =========================================================
+   SLIDE 10 — back to non-orthogonal; ask the FWL question
+   ========================================================= */
+async function renderSlide10() {
+  const svg = document.getElementById('svg10');
+  clear(svg);
+
+  // The familiar non-orthogonal scene with y, x1, x2
+  renderSlide3static(svg);
+
+  // Add a faint reminder of the two RED projections (the wrong answer)
+  // so the viewer remembers "this is what we got wrong"
+  line(svg, Y_end.x, Y_end.y, FOOT_on_x1.x, FOOT_on_x1.y, '#444', 1, 0.4, true);
+  line(svg, Y_end.x, Y_end.y, FOOT_on_x2.x, FOOT_on_x2.y, '#444', 1, 0.4, true);
+  el('line', { x1: ORIGIN.x, y1: ORIGIN.y,
+    x2: FOOT_on_x1.x, y2: FOOT_on_x1.y,
+    stroke: COLORS.red, 'stroke-width': 4, 'stroke-linecap': 'round', opacity: 0.5 }, svg);
+  el('line', { x1: ORIGIN.x, y1: ORIGIN.y,
+    x2: FOOT_on_x2.x, y2: FOOT_on_x2.y,
+    stroke: COLORS.red, 'stroke-width': 4, 'stroke-linecap': 'round', opacity: 0.5 }, svg);
+
+  await delay(400);
+
+  // Floating question mark / call-out
+  const callout = text(svg, 200, 200, 'Can we build an orthogonal direction', '#fff', 24, false, 400);
+  callout.setAttribute('opacity', 0);
+  const callout2 = text(svg, 200, 235, 'out of what we already have?', '#fff', 24, false, 400);
+  callout2.setAttribute('opacity', 0);
+  await animate(700, t => {
+    callout.setAttribute('opacity', t);
+    callout2.setAttribute('opacity', t);
+  });
+
+  // A big question mark hovering near the angle between x1 and x2
+  const midAngle = (x1_angle + x2_angle) / 2;
+  const qPos = { x: ORIGIN.x + Math.cos(midAngle) * 200, y: ORIGIN.y + Math.sin(midAngle) * 200 };
+  const q = text(svg, qPos.x, qPos.y, '?', '#fff', 64, false, 400);
+  q.setAttribute('text-anchor', 'middle');
+  q.setAttribute('opacity', 0);
+  // gentle pulse
+  await animate(800, t => q.setAttribute('opacity', t * 0.85));
+  animate(1500, t => {
+    const pulse = 0.85 + Math.sin(t * Math.PI * 2) * 0.15;
+    q.setAttribute('opacity', pulse);
+  }, t => t);
+}
+
+/* =========================================================
+   SLIDE 11 — build v (x₂ residualized vs x₁), regress y on v
+   Animation arc:
+     1) Start with the slide-3 scene (x1, x2, y).
+     2) Drop a perpendicular from the tip of x₂ to the x₁ line.
+        The foot is x₂'s projection onto x₁. The dropped segment
+        is v — it's orthogonal to x₁ by construction.
+     3) Highlight v in green and label it. Show its right-angle to x₁.
+     4) Translate a copy of v to the origin so we can use it as
+        a regressor direction.
+     5) Project y perpendicularly onto this v-direction. The
+        projection segment, drawn in BLUE, has length equal to β̂₂
+        from the long regression. Show that explicitly.
+   ========================================================= */
+async function renderSlide11() {
+  const svg = document.getElementById('svg11');
+  clear(svg);
+  renderSlide3static(svg);
+
+  await delay(300);
+
+  // ---- Step 1: project x₂ onto x₁ direction ----
+  // Find the foot of perpendicular from X2_end onto the x₁ line.
+  // Scalar projection of x₂ onto x₁: |x₂| cos(x2_angle - x1_angle).
+  const x2_proj_on_x1_scalar = x2_len * Math.cos(x2_angle - x1_angle);
+  const FOOT_x2_on_x1 = vec(x1_angle, x2_proj_on_x1_scalar);
+
+  // Draw the perpendicular dashed line from X2_end down to FOOT_x2_on_x1
+  const drop = el('line', {
+    x1: X2_end.x, y1: X2_end.y,
+    x2: X2_end.x, y2: X2_end.y,
+    stroke: '#888', 'stroke-width': 1.5, 'stroke-dasharray': '6 5',
+    'stroke-linecap': 'round'
+  }, svg);
+  await animate(700, t => {
+    drop.setAttribute('x2', X2_end.x + (FOOT_x2_on_x1.x - X2_end.x) * t);
+    drop.setAttribute('y2', X2_end.y + (FOOT_x2_on_x1.y - X2_end.y) * t);
+  });
+  rightAngleMark(svg, FOOT_x2_on_x1.x, FOOT_x2_on_x1.y, X2_end.x, X2_end.y,
+    ORIGIN.x + (FOOT_x2_on_x1.x - ORIGIN.x) * 0.6, ORIGIN.y + (FOOT_x2_on_x1.y - ORIGIN.y) * 0.6);
+
+  await delay(300);
+
+  // ---- Step 2: highlight v (the dropped segment, in green) ----
+  // v vector goes FROM the foot TO the tip of x₂ (so the tip is x₂'s
+  // "residual" location after removing the x₁ component).
+  const vArrow = arrow(svg, FOOT_x2_on_x1.x, FOOT_x2_on_x1.y, X2_end.x, X2_end.y,
+    COLORS.green, 3.5, 0);
+  await animate(500, t => vArrow.setAttribute('opacity', t));
+
+  // Label v at the midpoint of the v segment
+  const vMid = { x: (FOOT_x2_on_x1.x + X2_end.x) / 2, y: (FOOT_x2_on_x1.y + X2_end.y) / 2 };
+  const vLabel = text(svg, vMid.x - 32, vMid.y, 'v', COLORS.green, 28, true, 500);
+  vLabel.setAttribute('opacity', 0);
+  await animate(300, t => vLabel.setAttribute('opacity', t));
+
+  await delay(500);
+
+  // ---- Step 3: translate v to the origin so we can use it as a regressor ----
+  const v_dx = X2_end.x - FOOT_x2_on_x1.x;
+  const v_dy = X2_end.y - FOOT_x2_on_x1.y;
+  const v_len_px = Math.hypot(v_dx, v_dy);
+  const v_angle = Math.atan2(v_dy, v_dx);
+
+  // Animate the v arrow sliding from its current position down to the origin.
+  const vCopy = el('line', {
+    x1: FOOT_x2_on_x1.x, y1: FOOT_x2_on_x1.y,
+    x2: X2_end.x, y2: X2_end.y,
+    stroke: COLORS.green, 'stroke-width': 3.5, 'stroke-linecap': 'round'
+  }, svg);
+  const vTip_target = { x: ORIGIN.x + v_dx, y: ORIGIN.y + v_dy };
+  await animate(900, t => {
+    vCopy.setAttribute('x1', FOOT_x2_on_x1.x + (ORIGIN.x - FOOT_x2_on_x1.x) * t);
+    vCopy.setAttribute('y1', FOOT_x2_on_x1.y + (ORIGIN.y - FOOT_x2_on_x1.y) * t);
+    vCopy.setAttribute('x2', X2_end.x + (vTip_target.x - X2_end.x) * t);
+    vCopy.setAttribute('y2', X2_end.y + (vTip_target.y - X2_end.y) * t);
+  });
+  vCopy.remove();
+  const vAtOrigin = arrow(svg, ORIGIN.x, ORIGIN.y, vTip_target.x, vTip_target.y, COLORS.green, 3.5);
+
+  // Label "v" at the tip
+  const vLabel2 = text(svg, vTip_target.x + 12, vTip_target.y + 4, 'v', COLORS.green, 26, true, 500);
+  vLabel2.setAttribute('opacity', 0);
+  await animate(300, t => vLabel2.setAttribute('opacity', t));
+
+  // Right-angle marker between v and x₁ at the origin
+  const ra_size = 16;
+  const ax = Math.cos(v_angle) * ra_size, ay = Math.sin(v_angle) * ra_size;
+  const bx = Math.cos(x1_angle) * ra_size, by = Math.sin(x1_angle) * ra_size;
+  const raMark = el('polyline', {
+    points: `${ORIGIN.x + ax},${ORIGIN.y + ay} ${ORIGIN.x + ax + bx},${ORIGIN.y + ay + by} ${ORIGIN.x + bx},${ORIGIN.y + by}`,
+    fill: 'none', stroke: '#fff', 'stroke-width': 1.5, opacity: 0
+  }, svg);
+  await animate(300, t => raMark.setAttribute('opacity', t * 0.8));
+
+  await delay(400);
+
+  // ---- Step 4: project y onto v (passing through origin) ----
+  const y_proj_on_v_scalar_px = y_len * UNIT * Math.cos(y_angle - v_angle);
+  const FOOT_y_on_v = {
+    x: ORIGIN.x + Math.cos(v_angle) * y_proj_on_v_scalar_px,
+    y: ORIGIN.y + Math.sin(v_angle) * y_proj_on_v_scalar_px
+  };
+
+  // Dashed perpendicular from Y_end to FOOT_y_on_v
+  const dashYV = el('line', {
+    x1: Y_end.x, y1: Y_end.y,
+    x2: Y_end.x, y2: Y_end.y,
+    stroke: '#888', 'stroke-width': 1.5, 'stroke-dasharray': '6 5',
+    'stroke-linecap': 'round'
+  }, svg);
+  await animate(700, t => {
+    dashYV.setAttribute('x2', Y_end.x + (FOOT_y_on_v.x - Y_end.x) * t);
+    dashYV.setAttribute('y2', Y_end.y + (FOOT_y_on_v.y - Y_end.y) * t);
+  });
+  rightAngleMark(svg, FOOT_y_on_v.x, FOOT_y_on_v.y, Y_end.x, Y_end.y,
+    ORIGIN.x + (FOOT_y_on_v.x - ORIGIN.x) * 0.6, ORIGIN.y + (FOOT_y_on_v.y - ORIGIN.y) * 0.6);
+
+  await delay(200);
+
+  // The BLUE projection segment from origin to FOOT_y_on_v
+  let blueLine = null;
+  await animate(800, t => {
+    if (blueLine) blueLine.remove();
+    blueLine = el('line', {
+      x1: ORIGIN.x, y1: ORIGIN.y,
+      x2: ORIGIN.x + (FOOT_y_on_v.x - ORIGIN.x) * t,
+      y2: ORIGIN.y + (FOOT_y_on_v.y - ORIGIN.y) * t,
+      stroke: COLORS.blue, 'stroke-width': 6, 'stroke-linecap': 'round'
+    }, svg);
+  });
+
+  // Label this segment β̂₂ · v
+  const blueMid = { x: (ORIGIN.x + FOOT_y_on_v.x) / 2, y: (ORIGIN.y + FOOT_y_on_v.y) / 2 };
+  const blueLab = text(svg, blueMid.x + 12, blueMid.y - 14, 'β̂₂', COLORS.blue, 26, true, 500);
+  blueLab.setAttribute('opacity', 0);
+  await animate(300, t => blueLab.setAttribute('opacity', t));
+
+  // ============================================================
+  // SYMMETRIC CONSTRUCTION — residualize x₁ against x₂ → u,
+  // then project y onto u to recover β̂₁ from the long regression.
+  // ============================================================
+  await delay(500);
+
+  // Dim the v-side construction a touch so the new construction reads cleanly
+  vAtOrigin.setAttribute('opacity', 0.45);
+  vArrow.setAttribute('opacity', 0.45);
+  vLabel.setAttribute('opacity', 0.45);
+  vLabel2.setAttribute('opacity', 0.45);
+  blueLine.setAttribute('opacity', 0.45);
+
+  const UCOLOR = '#FFB877';   // peach, distinct from green v
+
+  // ---- Step 1': drop x₁ tip perpendicular onto x₂ line ----
+  const x1_proj_on_x2_scalar = x1_len * Math.cos(x1_angle - x2_angle);
+  const FOOT_x1_on_x2 = vec(x2_angle, x1_proj_on_x2_scalar);
+
+  const drop_u = el('line', {
+    x1: X1_end.x, y1: X1_end.y, x2: X1_end.x, y2: X1_end.y,
+    stroke: '#888', 'stroke-width': 1.5, 'stroke-dasharray': '6 5',
+    'stroke-linecap': 'round'
+  }, svg);
+  await animate(700, t => {
+    drop_u.setAttribute('x2', X1_end.x + (FOOT_x1_on_x2.x - X1_end.x) * t);
+    drop_u.setAttribute('y2', X1_end.y + (FOOT_x1_on_x2.y - X1_end.y) * t);
+  });
+  rightAngleMark(svg, FOOT_x1_on_x2.x, FOOT_x1_on_x2.y, X1_end.x, X1_end.y,
+    ORIGIN.x + (FOOT_x1_on_x2.x - ORIGIN.x) * 0.6, ORIGIN.y + (FOOT_x1_on_x2.y - ORIGIN.y) * 0.6);
+
+  await delay(250);
+
+  // ---- Step 2': highlight u (the dropped segment, in peach) ----
+  const uArrow = arrow(svg, FOOT_x1_on_x2.x, FOOT_x1_on_x2.y, X1_end.x, X1_end.y,
+    UCOLOR, 3.5, 0);
+  await animate(500, t => uArrow.setAttribute('opacity', t));
+  const uMid = { x: (FOOT_x1_on_x2.x + X1_end.x) / 2, y: (FOOT_x1_on_x2.y + X1_end.y) / 2 };
+  const uLabel = text(svg, uMid.x + 14, uMid.y + 6, 'u', UCOLOR, 28, true, 500);
+  uLabel.setAttribute('opacity', 0);
+  await animate(300, t => uLabel.setAttribute('opacity', t));
+
+  await delay(400);
+
+  // ---- Step 3': translate u to the origin ----
+  const u_dx = X1_end.x - FOOT_x1_on_x2.x;
+  const u_dy = X1_end.y - FOOT_x1_on_x2.y;
+  const u_angle = Math.atan2(u_dy, u_dx);
+  const uTip_target = { x: ORIGIN.x + u_dx, y: ORIGIN.y + u_dy };
+
+  const uCopy = el('line', {
+    x1: FOOT_x1_on_x2.x, y1: FOOT_x1_on_x2.y,
+    x2: X1_end.x, y2: X1_end.y,
+    stroke: UCOLOR, 'stroke-width': 3.5, 'stroke-linecap': 'round'
+  }, svg);
+  await animate(900, t => {
+    uCopy.setAttribute('x1', FOOT_x1_on_x2.x + (ORIGIN.x - FOOT_x1_on_x2.x) * t);
+    uCopy.setAttribute('y1', FOOT_x1_on_x2.y + (ORIGIN.y - FOOT_x1_on_x2.y) * t);
+    uCopy.setAttribute('x2', X1_end.x + (uTip_target.x - X1_end.x) * t);
+    uCopy.setAttribute('y2', X1_end.y + (uTip_target.y - X1_end.y) * t);
+  });
+  uCopy.remove();
+  arrow(svg, ORIGIN.x, ORIGIN.y, uTip_target.x, uTip_target.y, UCOLOR, 3.5);
+  const uLabel2 = text(svg, uTip_target.x + 14, uTip_target.y + 22, 'u', UCOLOR, 26, true, 500);
+  uLabel2.setAttribute('opacity', 0);
+  await animate(300, t => uLabel2.setAttribute('opacity', t));
+
+  // Right-angle marker between u and x₂ at the origin
+  {
+    const ra = 16;
+    const ax = Math.cos(u_angle) * ra, ay = Math.sin(u_angle) * ra;
+    const bx = Math.cos(x2_angle) * ra, by = Math.sin(x2_angle) * ra;
+    const raMarkU = el('polyline', {
+      points: `${ORIGIN.x + ax},${ORIGIN.y + ay} ${ORIGIN.x + ax + bx},${ORIGIN.y + ay + by} ${ORIGIN.x + bx},${ORIGIN.y + by}`,
+      fill: 'none', stroke: '#fff', 'stroke-width': 1.5, opacity: 0
+    }, svg);
+    await animate(300, t => raMarkU.setAttribute('opacity', t * 0.8));
+  }
+
+  await delay(300);
+
+  // ---- Step 4': project y onto u ----
+  const y_proj_on_u_scalar_px = y_len * UNIT * Math.cos(y_angle - u_angle);
+  const FOOT_y_on_u = {
+    x: ORIGIN.x + Math.cos(u_angle) * y_proj_on_u_scalar_px,
+    y: ORIGIN.y + Math.sin(u_angle) * y_proj_on_u_scalar_px
+  };
+
+  const dashYU = el('line', {
+    x1: Y_end.x, y1: Y_end.y, x2: Y_end.x, y2: Y_end.y,
+    stroke: '#888', 'stroke-width': 1.5, 'stroke-dasharray': '6 5',
+    'stroke-linecap': 'round'
+  }, svg);
+  await animate(700, t => {
+    dashYU.setAttribute('x2', Y_end.x + (FOOT_y_on_u.x - Y_end.x) * t);
+    dashYU.setAttribute('y2', Y_end.y + (FOOT_y_on_u.y - Y_end.y) * t);
+  });
+  rightAngleMark(svg, FOOT_y_on_u.x, FOOT_y_on_u.y, Y_end.x, Y_end.y,
+    ORIGIN.x + (FOOT_y_on_u.x - ORIGIN.x) * 0.6, ORIGIN.y + (FOOT_y_on_u.y - ORIGIN.y) * 0.6);
+
+  await delay(150);
+
+  let blueLine2 = null;
+  await animate(800, t => {
+    if (blueLine2) blueLine2.remove();
+    blueLine2 = el('line', {
+      x1: ORIGIN.x, y1: ORIGIN.y,
+      x2: ORIGIN.x + (FOOT_y_on_u.x - ORIGIN.x) * t,
+      y2: ORIGIN.y + (FOOT_y_on_u.y - ORIGIN.y) * t,
+      stroke: COLORS.blue, 'stroke-width': 6, 'stroke-linecap': 'round'
+    }, svg);
+  });
+  const blueMid2 = { x: (ORIGIN.x + FOOT_y_on_u.x) / 2, y: (ORIGIN.y + FOOT_y_on_u.y) / 2 };
+  const blueLab2 = text(svg, blueMid2.x - 8, blueMid2.y + 32, 'β̂₁', COLORS.blue, 26, true, 500);
+  blueLab2.setAttribute('opacity', 0);
+  await animate(300, t => blueLab2.setAttribute('opacity', t));
+
+  // ---- Step 5: punchline note in the corner ----
+  const note = text(svg, 60, 720,
+    'y on v → β̂₂      ·      y on u → β̂₁      FWL works both ways.',
+    '#ddd', 18, false);
+  note.setAttribute('opacity', 0);
+  await animate(500, t => note.setAttribute('opacity', t));
+}
+
+/* =========================================================
+   SLIDE 12 — full 3D version of the FWL story
+   The 3D scene stays in 3D throughout (no collapse to 2D).
+   We use a fixed camera and render the col(X) plane as a shaded
+   parallelogram with gridlines for depth perception. Vectors are
+   drawn with consistent perspective, labels offset so they don't
+   collide.
+
+   Animation arc:
+     A) Fade in the plane + gridlines + origin.
+     B) Draw x₁ and x₂ in the plane (with labels).
+     C) Draw y (out of plane, has a vertical component).
+     D) Drop a dashed perpendicular from y to the plane. The foot
+        is ŷ — draw the ŷ arrow in the plane.
+     E) Within the plane, drop a perpendicular from x₂ tip onto
+        the x₁ line. The dropped segment is v (green); label it.
+     F) Translate v so it starts at the origin — it's now a
+        regressor lying in the plane, perpendicular to x₁.
+     G) Drop a dashed perpendicular from ŷ onto the v line.
+        The foot defines a BLUE segment from origin, of length
+        β̂₂ along v.
+   ========================================================= */
+async function renderSlide12() {
+  const svg = document.getElementById('svg12');
+  clear(svg);
+
+  // -----------------------------------------------------------
+  // 3D geometry (right-handed: +x right, +y away into scene, +z up)
+  // -----------------------------------------------------------
+  const X1_3d = { x: 4.5, y: 0, z: 0 };
+  const x2_3d_angle = 52 * Math.PI / 180;
+  const x2_3d_len = 4.5;
+  const X2_3d = {
+    x: Math.cos(x2_3d_angle) * x2_3d_len,
+    y: Math.sin(x2_3d_angle) * x2_3d_len,
+    z: 0
+  };
+
+  // ŷ is a positive combination of x₁ and x₂ inside the plane.
+  // y = ŷ + vertical residual.
+  const BETA1_HAT = 0.45;
+  const BETA2_HAT = 0.55;
+  const yhat_3d = {
+    x: BETA1_HAT * X1_3d.x + BETA2_HAT * X2_3d.x,
+    y: BETA1_HAT * X1_3d.y + BETA2_HAT * X2_3d.y,
+    z: 0
+  };
+  const y_3d = { x: yhat_3d.x, y: yhat_3d.y, z: 3.5 };
+
+  // x₂ residualized against x₁ (lives in the plane)
+  const x1dotx2 = X1_3d.x*X2_3d.x + X1_3d.y*X2_3d.y;
+  const x1dotx1 = X1_3d.x*X1_3d.x + X1_3d.y*X1_3d.y;
+  const k = x1dotx2 / x1dotx1;
+  const FOOT_x2_on_x1 = { x: k * X1_3d.x, y: k * X1_3d.y, z: 0 };
+  const v_dir = { x: X2_3d.x - FOOT_x2_on_x1.x, y: X2_3d.y - FOOT_x2_on_x1.y, z: 0 };
+  const v_len = Math.hypot(v_dir.x, v_dir.y);
+  const v_unit = { x: v_dir.x / v_len, y: v_dir.y / v_len, z: 0 };
+
+  // ŷ projected onto the v line through origin
+  const yhat_dot_v = yhat_3d.x * v_unit.x + yhat_3d.y * v_unit.y;
+  const FOOT_yhat_on_v = { x: yhat_dot_v * v_unit.x, y: yhat_dot_v * v_unit.y, z: 0 };
+
+  // -----------------------------------------------------------
+  // Fixed 3D camera
+  // -----------------------------------------------------------
+  const camera = { yaw: 22, pitch: -32, scale: 88, cx: 660, cy: 440 };
+
+  function project3d(p) {
+    const yaw = camera.yaw * Math.PI / 180;
+    const pitch = camera.pitch * Math.PI / 180;
+    const xr = p.x * Math.cos(yaw) - p.y * Math.sin(yaw);
+    const yr = p.x * Math.sin(yaw) + p.y * Math.cos(yaw);
+    const zr = p.z;
+    const xp = xr;
+    const zp = yr * Math.sin(pitch) + zr * Math.cos(pitch);
+    return { x: camera.cx + xp * camera.scale, y: camera.cy - zp * camera.scale };
+  }
+
+  // Convenience helpers for drawing 3D primitives in 2D SVG
+  function arrow3d(from, to, color, width = 2.8, opacity = 1) {
+    const p1 = project3d(from);
+    const p2 = project3d(to);
+    return arrow(svg, p1.x, p1.y, p2.x, p2.y, color, width, opacity);
+  }
+  function line3d(from, to, color, width = 1.5, opacity = 1, dashed = false) {
+    const p1 = project3d(from);
+    const p2 = project3d(to);
+    return line(svg, p1.x, p1.y, p2.x, p2.y, color, width, opacity, dashed);
+  }
+  function dot3d(p, r, fill) {
+    const sp = project3d(p);
+    return el('circle', { cx: sp.x, cy: sp.y, r, fill }, svg);
+  }
+  function text3d(anchor, str, color, size, dx = 0, dy = 0, italic = true, weight = 500) {
+    const p = project3d(anchor);
+    const t = el('text', {
+      x: p.x + dx, y: p.y + dy, fill: color,
+      'font-size': size,
+      'font-style': italic ? 'italic' : 'normal',
+      'font-weight': weight
+    }, svg);
+    t.textContent = str;
+    return t;
+  }
+
+  // -----------------------------------------------------------
+  // (A) Plane + grid + origin
+  // -----------------------------------------------------------
+  const planeVerts = [
+    { x: -1.2, y: -1.2, z: 0 },
+    { x:  5.6, y: -1.2, z: 0 },
+    { x:  5.6, y:  5.2, z: 0 },
+    { x: -1.2, y:  5.2, z: 0 }
+  ];
+  const planeProjected = planeVerts.map(v => project3d(v));
+  const planePoly = el('polygon', {
+    points: planeProjected.map(p => `${p.x},${p.y}`).join(' '),
+    fill: '#1c2440', 'fill-opacity': 0.55,
+    stroke: '#3d456a', 'stroke-width': 1.2
+  }, svg);
+  planePoly.setAttribute('opacity', 0);
+
+  const gridGroup = el('g', { opacity: 0 }, svg);
+  for (let i = -1; i <= 5; i++) {
+    const a = project3d({ x: i, y: -1.2, z: 0 });
+    const b = project3d({ x: i, y:  5.2, z: 0 });
+    el('line', { x1: a.x, y1: a.y, x2: b.x, y2: b.y,
+      stroke: '#363c5e', 'stroke-width': 0.7 }, gridGroup);
+  }
+  for (let j = -1; j <= 5; j++) {
+    const a = project3d({ x: -1.2, y: j, z: 0 });
+    const b = project3d({ x:  5.6, y: j, z: 0 });
+    el('line', { x1: a.x, y1: a.y, x2: b.x, y2: b.y,
+      stroke: '#363c5e', 'stroke-width': 0.7 }, gridGroup);
+  }
+
+  const planeLabel = text3d({ x: -0.9, y: 5.0, z: 0 }, 'col(X) plane', '#7783b8', 18, 0, 0, true, 400);
+  planeLabel.setAttribute('opacity', 0);
+
+  await animate(600, t => {
+    planePoly.setAttribute('opacity', t);
+    gridGroup.setAttribute('opacity', t * 0.9);
+    planeLabel.setAttribute('opacity', t * 0.85);
+  });
+
+  const originDot = dot3d({ x: 0, y: 0, z: 0 }, 5, '#fff');
+  originDot.setAttribute('opacity', 0);
+  await animate(300, t => originDot.setAttribute('opacity', t));
+
+  // -----------------------------------------------------------
+  // (B) x₁ and x₂ in the plane
+  // -----------------------------------------------------------
+  let x1A = null;
+  await animate(550, t => {
+    if (x1A) x1A.remove();
+    x1A = arrow3d({ x: 0, y: 0, z: 0 },
+      { x: X1_3d.x * t, y: X1_3d.y * t, z: 0 }, COLORS.x1, 3.2);
+  });
+  const x1L = text3d(X1_3d, 'Col(X₁)', COLORS.x1, 28, 16, 28);
+  x1L.setAttribute('opacity', 0);
+  await animate(300, t => x1L.setAttribute('opacity', t));
+
+  let x2A = null;
+  await animate(550, t => {
+    if (x2A) x2A.remove();
+    x2A = arrow3d({ x: 0, y: 0, z: 0 },
+      { x: X2_3d.x * t, y: X2_3d.y * t, z: 0 }, COLORS.x2, 3.2);
+  });
+  const x2L = text3d(X2_3d, 'Col(X₂)', COLORS.x2, 28, -110, -2);
+  x2L.setAttribute('opacity', 0);
+  await animate(300, t => x2L.setAttribute('opacity', t));
+
+  await delay(250);
+
+  // -----------------------------------------------------------
+  // (C) y sticks out of the plane
+  // -----------------------------------------------------------
+  let yA = null;
+  await animate(750, t => {
+    if (yA) yA.remove();
+    yA = arrow3d({ x: 0, y: 0, z: 0 },
+      { x: y_3d.x * t, y: y_3d.y * t, z: y_3d.z * t }, COLORS.y, 3.8);
+  });
+  const yL = text3d(y_3d, 'y', COLORS.y, 32, 14, 6);
+  yL.setAttribute('opacity', 0);
+  await animate(300, t => yL.setAttribute('opacity', t));
+
+  await delay(350);
+
+  // -----------------------------------------------------------
+  // (D) Drop perpendicular from y to plane → ŷ
+  // -----------------------------------------------------------
+  let drop = null;
+  await animate(700, t => {
+    if (drop) drop.remove();
+    drop = line3d(y_3d,
+      { x: yhat_3d.x, y: yhat_3d.y, z: y_3d.z * (1 - t) },
+      '#bbb', 1.6, 0.85, true);
+  });
+
+  // ŷ vector in the plane
+  let yhatA = null;
+  await animate(550, t => {
+    if (yhatA) yhatA.remove();
+    yhatA = arrow3d({ x: 0, y: 0, z: 0 },
+      { x: yhat_3d.x * t, y: yhat_3d.y * t, z: 0 }, '#8478C8', 3);
+  });
+  const yhatL = text3d(yhat_3d, 'ŷ', '#A095D8', 28, 14, 8);
+  yhatL.setAttribute('opacity', 0);
+  await animate(300, t => yhatL.setAttribute('opacity', t));
+
+  await delay(500);
+
+  // -----------------------------------------------------------
+  // (E) Residualize x₂ against x₁ in the plane → v
+  // -----------------------------------------------------------
+  let dropV = null;
+  await animate(650, t => {
+    if (dropV) dropV.remove();
+    const tip = {
+      x: X2_3d.x + (FOOT_x2_on_x1.x - X2_3d.x) * t,
+      y: X2_3d.y + (FOOT_x2_on_x1.y - X2_3d.y) * t,
+      z: 0
+    };
+    dropV = line3d(X2_3d, tip, '#bbb', 1.6, 0.85, true);
+  });
+
+  let vA = null;
+  await animate(550, t => {
+    if (vA) vA.remove();
+    const tip = {
+      x: FOOT_x2_on_x1.x + (X2_3d.x - FOOT_x2_on_x1.x) * t,
+      y: FOOT_x2_on_x1.y + (X2_3d.y - FOOT_x2_on_x1.y) * t,
+      z: 0
+    };
+    vA = arrow3d(FOOT_x2_on_x1, tip, COLORS.green, 3.4);
+  });
+  const vMid = { x: (FOOT_x2_on_x1.x + X2_3d.x)/2, y: (FOOT_x2_on_x1.y + X2_3d.y)/2, z: 0 };
+  const vL = text3d(vMid, 'v', COLORS.green, 28, 18, 8);
+  vL.setAttribute('opacity', 0);
+  await animate(300, t => vL.setAttribute('opacity', t));
+
+  await delay(500);
+
+  // -----------------------------------------------------------
+  // (F) Translate v to start at the origin
+  // -----------------------------------------------------------
+  const vOriginTip = { x: v_dir.x, y: v_dir.y, z: 0 };
+  await animate(900, t => {
+    if (vA) vA.remove();
+    const from = {
+      x: FOOT_x2_on_x1.x * (1 - t),
+      y: FOOT_x2_on_x1.y * (1 - t),
+      z: 0
+    };
+    const to = {
+      x: X2_3d.x + (vOriginTip.x - X2_3d.x) * t,
+      y: X2_3d.y + (vOriginTip.y - X2_3d.y) * t,
+      z: 0
+    };
+    vA = arrow3d(from, to, COLORS.green, 3.4);
+    // also slide the label
+    const mid = { x: (from.x + to.x)/2, y: (from.y + to.y)/2, z: 0 };
+    const mp = project3d(mid);
+    vL.setAttribute('x', mp.x + 18);
+    vL.setAttribute('y', mp.y + 8);
+  });
+
+  // Right-angle marker between x₁ and v at the origin (screen-space)
+  const oP = project3d({ x: 0, y: 0, z: 0 });
+  const x1tipP = project3d(X1_3d);
+  const vtipP = project3d(vOriginTip);
+  const ra_size = 16;
+  const u_x1 = { x: (x1tipP.x - oP.x), y: (x1tipP.y - oP.y) };
+  const u_x1_len = Math.hypot(u_x1.x, u_x1.y);
+  const u_v = { x: (vtipP.x - oP.x), y: (vtipP.y - oP.y) };
+  const u_v_len = Math.hypot(u_v.x, u_v.y);
+  if (u_x1_len > 1 && u_v_len > 1) {
+    const ax = u_x1.x / u_x1_len * ra_size, ay = u_x1.y / u_x1_len * ra_size;
+    const bx = u_v.x / u_v_len * ra_size,  by = u_v.y / u_v_len * ra_size;
+    const raMark = el('polyline', {
+      points: `${oP.x + ax},${oP.y + ay} ${oP.x + ax + bx},${oP.y + ay + by} ${oP.x + bx},${oP.y + by}`,
+      fill: 'none', stroke: '#fff', 'stroke-width': 1.4, opacity: 0
+    }, svg);
+    await animate(300, t => raMark.setAttribute('opacity', t * 0.8));
+  }
+
+  await delay(300);
+
+  // -----------------------------------------------------------
+  // (G) Drop ŷ onto v, mark blue segment β̂₂·v
+  // -----------------------------------------------------------
+  let dropP = null;
+  await animate(700, t => {
+    if (dropP) dropP.remove();
+    const tip = {
+      x: yhat_3d.x + (FOOT_yhat_on_v.x - yhat_3d.x) * t,
+      y: yhat_3d.y + (FOOT_yhat_on_v.y - yhat_3d.y) * t,
+      z: 0
+    };
+    dropP = line3d(yhat_3d, tip, '#bbb', 1.6, 0.85, true);
+  });
+
+  let blueLn = null;
+  await animate(800, t => {
+    if (blueLn) blueLn.remove();
+    const p1 = project3d({ x: 0, y: 0, z: 0 });
+    const p2 = project3d({
+      x: FOOT_yhat_on_v.x * t,
+      y: FOOT_yhat_on_v.y * t,
+      z: 0
+    });
+    blueLn = el('line', {
+      x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y,
+      stroke: COLORS.blue, 'stroke-width': 7, 'stroke-linecap': 'round'
+    }, svg);
+  });
+
+  const blueMid = {
+    x: FOOT_yhat_on_v.x * 0.5,
+    y: FOOT_yhat_on_v.y * 0.5,
+    z: 0
+  };
+  const blueL = text3d(blueMid, 'β̂₂ v', COLORS.blue, 26, -64, 6);
+  blueL.setAttribute('opacity', 0);
+  await animate(400, t => blueL.setAttribute('opacity', t));
+}
+
+/* =========================================================
+   SLIDE 13 — recap the FWL recipe
+   ========================================================= */
+async function renderSlide13() {
+  const svg = document.getElementById('svg13');
+  clear(svg);
+
+  // Title
+  const title = text(svg, 700, 110, 'The FWL recipe', '#fff', 32, false, 500);
+  title.setAttribute('text-anchor', 'middle');
+  title.setAttribute('opacity', 0);
+  await animate(400, t => title.setAttribute('opacity', t));
+
+  await delay(200);
+
+  // Three numbered steps
+  const steps = [
+    { num: '1.', body: 'Regress X₂ on X₁ — take the residual v.', color: COLORS.green },
+    { num: '2.', body: 'Now {Col(X₁), v} is an orthogonal basis for the same column space.', color: '#ddd' },
+    { num: '3.', body: 'Regress y on v alone — recovers β̂₂ from the long regression.', color: COLORS.blue }
+  ];
+
+  const stepStartY = 230;
+  const stepGap = 80;
+
+  for (let i = 0; i < steps.length; i++) {
+    const s = steps[i];
+    const yPos = stepStartY + i * stepGap;
+    const num = text(svg, 220, yPos, s.num, s.color, 28, false, 500);
+    num.setAttribute('opacity', 0);
+    const body = text(svg, 280, yPos, s.body, s.color, 24, false, 400);
+    body.setAttribute('opacity', 0);
+    await animate(500, t => {
+      num.setAttribute('opacity', t);
+      body.setAttribute('opacity', t);
+    });
+    await delay(150);
+  }
+
+  await delay(400);
+
+  // Bottom punchline box
+  const boxY = 540;
+  const box = el('rect', {
+    x: 280, y: boxY, width: 840, height: 100,
+    rx: 8, fill: '#0a1a2a', stroke: COLORS.blue, 'stroke-width': 1.5, opacity: 0
+  }, svg);
+  await animate(500, t => box.setAttribute('opacity', t * 0.9));
+
+  const punch1 = text(svg, 700, boxY + 42, 'β̂₂ from (y on v)  =  β̂₂ from (y on X₁ and X₂)',
+    '#fff', 26, true, 500);
+  punch1.setAttribute('text-anchor', 'middle');
+  punch1.setAttribute('opacity', 0);
+  await animate(500, t => punch1.setAttribute('opacity', t));
+
+  const punch2 = text(svg, 700, boxY + 78, 'Same idea works for β̂₁ — just residualize X₁ instead.',
+    '#bbb', 18, false);
+  punch2.setAttribute('text-anchor', 'middle');
+  punch2.setAttribute('opacity', 0);
+  await animate(400, t => punch2.setAttribute('opacity', t));
+}
+
+/* SLIDE 0 — title ---------------------------------------- */
+async function renderSlide0() {
+  const svg = document.getElementById('svg0');
+  clear(svg);
+
+  // Single centered headline, no subtitle.
+  const t1 = el('text', {
+    x: 700, y: 410, fill: '#fff',
+    'font-size': 76,
+    'font-weight': 700,
+    'text-anchor': 'middle',
+    style: 'font-family:"Schibsted Grotesk","Helvetica Neue",Arial,sans-serif',
+    opacity: 0
+  }, svg);
+  t1.textContent = 'Visualizing FWL theorem';
+
+  await animate(900, t => t1.setAttribute('opacity', t));
+}
+
+/* =========================================================
+   ORCHESTRATION
+   ========================================================= */
+const slides = [
+  { id: 's0',  render: renderSlide0  },
+  { id: 's1',  render: renderSlide1  },
+  { id: 's2',  render: renderSlide2  },
+  { id: 's3',  render: renderSlide3  },
+  { id: 's4',  render: renderSlide4  },
+  { id: 's5',  render: renderSlide5  },
+  { id: 's6',  render: renderSlide6  },
+  { id: 's7',  render: renderSlide7  },
+  { id: 's8',  render: renderSlide8  },
+  { id: 's9',  render: renderSlide9  },
+  { id: 's10', render: renderSlide10 },
+  { id: 's11', render: renderSlide11 },
+  { id: 's12', render: renderSlide12 },
+  { id: 's13', render: renderSlide13 }
+];
+
+let current = 0;
+
+function show(i) {
+  slides.forEach((s, idx) => {
+    document.getElementById(s.id).classList.toggle('active', idx === i);
+  });
+  document.getElementById('pager').textContent = `${i + 1} / ${slides.length}`;
+  // run the animation
+  slides[i].render();
+}
+
+function next() {
+  if (current < slides.length - 1) { current++; show(current); }
+}
+function prev() {
+  if (current > 0) { current--; show(current); }
+}
+function replay() { show(current); }
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); next(); }
+  else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); prev(); }
+  else if (e.key === 'r' || e.key === 'R') { replay(); }
+  else if (e.key === 'f' || e.key === 'F') {
+    if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+    else document.exitFullscreen();
+  }
+});
+
+document.getElementById('playBtn').addEventListener('click', replay);
+
+show(0);
+
+// Enlarge β̂ / β̃ accents in the HTML captions (combining marks render tiny in the serif).
+document.querySelectorAll('.caption').forEach(c => {
+  c.innerHTML = c.innerHTML
+    .split('\u03b2\u0302').join('<span class="hacc">\u03b2<svg class="acc" viewBox="0 0 24 12"><path d="M2 10 L12 3 L22 10"/></svg></span>')
+    .split('\u03b2\u0303').join('<span class="tacc">\u03b2<svg class="acc" viewBox="0 0 24 12"><path d="M2 8 C6 3 9 3 12 6 C15 9 18 9 22 4"/></svg></span>');
+});
+</script>
+</body>
+</html>

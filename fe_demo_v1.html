@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+<title>Interpreting Fixed Effects</title>
+<style>
+  html, body {
+    margin: 0; padding: 0; width: 100%; height: 100%;
+    background: oklch(0.155 0.006 60);
+    color: oklch(0.965 0.004 85);
+    font-family: "Schibsted Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    overflow: hidden; -webkit-font-smoothing: antialiased;
+  }
+  .slide {
+    position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
+    display: none; align-items: center; justify-content: center; flex-direction: column;
+  }
+  .slide.active { display: flex; }
+  .stage { width: 90vw; max-width: 1400px; height: 75vh; position: relative; }
+  svg { width: 100%; height: 100%; display: block; }
+  .caption {
+    position: absolute; bottom: 4vh; left: 0; right: 0; text-align: center;
+    font-size: 1.4vw; color: oklch(0.8 0.006 78); line-height: 1.6;
+    padding: 0 6vw; min-height: 3em;
+  }
+  .caption .accent-s1   { color: #3DD9C9; font-weight: 500; }
+  .caption .accent-s2   { color: #F0A040; font-weight: 500; }
+  .caption .accent-s3   { color: #C8B6FF; font-weight: 500; }
+  .caption .accent-blue { color: #58C4DD; font-weight: 500; }
+  .caption .accent-pool { color: #FF6B6B; font-weight: 500; }
+  .caption .accent-v    { color: #A8E6CF; font-weight: 500; }
+  .caption .strong      { color: #fff; font-weight: 500; }
+  .caption .intuition   { display: inline-block; font-family: "STIX Two Text", Georgia, serif; font-style: italic; font-size: 0.72em; letter-spacing: 0.06em; text-transform: uppercase; color: #58C4DD; border: 1px solid rgba(88,196,221,0.5); border-radius: 100px; padding: 0.1em 0.7em; margin-right: 0.5em; vertical-align: middle; }
+  .pager { position: absolute; bottom: 1.5vh; right: 2vw; font-size: 0.85vw; color: oklch(0.55 0.006 70); font-variant-numeric: tabular-nums; }
+  .hint  { position: absolute; bottom: 1.5vh; left: 2vw; font-size: 1.05vw; color: oklch(0.55 0.006 70); }
+  .play-btn {
+    position: absolute; top: 2vh; right: 2vw; background: oklch(0.185 0.007 60);
+    border: 1px solid oklch(0.34 0.008 60); color: oklch(0.8 0.006 78);
+    padding: 0.5vw 1vw; font-size: 0.9vw; cursor: pointer; border-radius: 4px; font-family: inherit;
+  }
+  .play-btn:hover { background: oklch(0.225 0.009 62); color: oklch(0.965 0.004 85); }
+  .back-link {
+    position: absolute; top: 2vh; left: 2vw; z-index: 10;
+    display: inline-flex; align-items: center;
+    font-family: "Schibsted Grotesk", sans-serif; font-size: 1.15vw; font-weight: 600;
+    color: oklch(0.8 0.006 78); text-decoration: none; letter-spacing: 0.01em;
+    background: oklch(0.185 0.007 60); border: 1px solid oklch(0.34 0.008 60);
+    padding: 0.7vw 1.3vw; border-radius: 6px; transition: background .18s ease, color .18s ease, border-color .18s ease;
+  }
+  .back-link:hover { background: oklch(0.225 0.009 62); color: oklch(0.965 0.004 85); border-color: oklch(0.46 0.02 220); }
+  /* LaTeX-style β̂ accents in HTML captions */
+  .caption .hacc, .caption .tacc { position: relative; }
+  .caption .acc {
+    position: absolute; left: 50%; transform: translateX(-50%);
+    bottom: 0.84em; width: 0.74em; height: 0.34em; overflow: visible;
+    fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round;
+  }
+  .math { font-family: "STIX Two Text", "STIX Two Math", Georgia, serif; font-style: italic; }
+  text { font-family: "STIX Two Text", "STIX Two Math", Georgia, serif; }
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800;900&family=STIX+Two+Text:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+</head>
+<body>
+<a class="back-link" href="index.html">← All visualizations</a>
+
+<div class="slide" id="s0"><div class="stage"><svg id="svg0" viewBox="0 0 1400 800" preserveAspectRatio="xMidYMid meet"></svg></div></div>
+
+<div class="slide" id="s1">
+  <div class="stage"><svg id="svg1" viewBox="0 0 1400 800" preserveAspectRatio="xMidYMid meet"></svg></div>
+  <div class="caption">Panel data: each unit belongs to a group <span class="math">W<tspan>ᵢ</tspan></span> — here, its <span class="strong">state</span>. That group identity is the <span class="strong">fixed effect</span>.</div>
+</div>
+
+<div class="slide" id="s2">
+  <div class="stage"><svg id="svg2" viewBox="0 0 1400 800" preserveAspectRatio="xMidYMid meet"></svg></div>
+  <div class="caption">Ignore the groups and fit one line through all points. The <span class="accent-pool">pooled slope</span> looks steep.</div>
+</div>
+
+<div class="slide" id="s3">
+  <div class="stage"><svg id="svg3" viewBox="0 0 1400 800" preserveAspectRatio="xMidYMid meet"></svg></div>
+  <div class="caption">But the <span class="accent-s1">groups</span> <span class="accent-s2">sit at</span> <span class="accent-s3">different levels</span>. The pooled slope mixes <span class="strong">within-group</span> and <span class="strong">between-group</span> variation.</div>
+</div>
+
+<div class="slide" id="s4">
+  <div class="stage"><svg id="svg4" viewBox="0 0 1400 800" preserveAspectRatio="xMidYMid meet"></svg></div>
+  <div class="caption">Fixed effects split the data by group. Look at each state on its own.</div>
+</div>
+
+<div class="slide" id="s5">
+  <div class="stage"><svg id="svg5" viewBox="0 0 1400 800" preserveAspectRatio="xMidYMid meet"></svg></div>
+  <div class="caption">The <span class="strong">within transform</span>: subtract each group's mean, <span class="accent-v">V<tspan>ᵢ</tspan> = X<tspan>ᵢ</tspan> − E[X<tspan>ᵢ</tspan>|W<tspan>ᵢ</tspan>]</span>. The level differences vanish.</div>
+</div>
+
+<div class="slide" id="s6">
+  <div class="stage"><svg id="svg6" viewBox="0 0 1400 800" preserveAspectRatio="xMidYMid meet"></svg></div>
+  <div class="caption">Now regress <span class="math">y</span> on <span class="accent-v">V</span> within each group. A <span class="accent-s1">narrow</span> X-spread lets the fit wobble; a <span class="accent-s3">wide</span> one holds it steady — each yields a within slope <span class="accent-blue">β̂(W<tspan>ᵢ</tspan>)</span>.</div>
+</div>
+
+<div class="slide" id="s7">
+  <div class="stage"><svg id="svg7" viewBox="0 0 1400 800" preserveAspectRatio="xMidYMid meet"></svg></div>
+  <div class="caption">Weight each state by its <span class="math">X</span>-variation — more spread, more weight. <span class="intuition">Intuition</span> a <span class="accent-s3">wide</span> spread makes the fit more stable, so it counts more; <span class="accent-s1">State 1</span> barely at all.</div>
+</div>
+
+<div class="slide" id="s8">
+  <div class="stage"><svg id="svg8" viewBox="0 0 1400 800" preserveAspectRatio="xMidYMid meet"></svg></div>
+  <div class="caption">Merge into one cloud. The <span class="accent-pool">pooled</span> line (ignoring groups) is steep — the fixed-effects <span class="accent-blue">β̂</span> swings down to the within slope, ruled by the <span class="accent-s3">wide-spread</span> states.</div>
+</div>
+
+<div class="pager" id="pager">1 / 8</div>
+<div class="hint">← → to navigate · Space = next · R = replay animation</div>
+<button class="play-btn" id="playBtn">▶ Replay (R)</button>
+
+<script>
+/* =========================================================
+   PALETTE  (shared with the FWL demo / site)
+   ========================================================= */
+const COLORS = {
+  s: ['#3DD9C9', '#F0A040', '#C8B6FF'],   // State 1, 2, 3
+  pool: '#FF6B6B',    // naive pooled line
+  fe:   '#58C4DD',    // fixed-effects (within) estimate
+  v:    '#A8E6CF',    // the within residual / transform
+  axis: '#5a564e',
+  faint:'#39352f',
+  white:'#fff',
+  dim:  '#9a948a'
+};
+const STATE_NAME = ['State 1', 'State 2', 'State 3'];
+
+/* =========================================================
+   DATA  — 9 units, 3 states. Built so that:
+     • within-group slopes are gentle & similar (~0.44–0.50)
+     • group means climb faster ⇒ pooled slope is steeper (the trap)
+     • X-spread grows S1<S2<S3 ⇒ later a weighting story
+   ========================================================= */
+const DATA = [
+  { id: 1, s: 0, x: 2.3, y: 3.02 }, { id: 2, s: 0, x: 2.5, y: 3.20 }, { id: 3, s: 0, x: 2.7, y: 3.38 },
+  { id: 4, s: 1, x: 4.0, y: 4.70 }, { id: 5, s: 1, x: 5.0, y: 5.20 }, { id: 6, s: 1, x: 6.0, y: 5.70 },
+  { id: 7, s: 2, x: 5.5, y: 6.40 }, { id: 8, s: 2, x: 7.5, y: 7.00 }, { id: 9, s: 2, x: 9.5, y: 7.60 }
+];
+
+/* =========================================================
+   STATS
+   ========================================================= */
+const mean = a => a.reduce((s, v) => s + v, 0) / a.length;
+function olsFit(pts) {
+  const mx = mean(pts.map(p => p.x)), my = mean(pts.map(p => p.y));
+  let sxy = 0, sxx = 0;
+  pts.forEach(p => { sxy += (p.x - mx) * (p.y - my); sxx += (p.x - mx) * (p.x - mx); });
+  const b1 = sxy / sxx, b0 = my - b1 * mx;
+  return { b0, b1, mx, my, sxx };
+}
+const GROUPS = [0, 1, 2].map(g => {
+  const pts = DATA.filter(d => d.s === g);
+  const f = olsFit(pts);
+  return { g, pts, ...f };            // mx,my = group means; sxx = within X-variation
+});
+const POOL = olsFit(DATA);
+const BETWEEN = olsFit(GROUPS.map(gr => ({ x: gr.mx, y: gr.my })));
+// FE estimate = variance-weighted average of within slopes
+const FE_SLOPE = GROUPS.reduce((s, gr) => s + gr.sxx * gr.b1, 0) / GROUPS.reduce((s, gr) => s + gr.sxx, 0);
+const SXX_TOTAL = GROUPS.reduce((s, gr) => s + gr.sxx, 0);
+const REF_SXX = Math.min(...GROUPS.map(g => g.sxx));   // smallest within X-variation (most wobble)
+
+/* =========================================================
+   SVG HELPERS  (same set as the FWL demo)
+   ========================================================= */
+function el(tag, attrs = {}, parent = null) {
+  const n = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  for (const k in attrs) n.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(n);
+  return n;
+}
+function arrow(svg, x1, y1, x2, y2, color, width = 2.5, opacity = 1, dashed = false) {
+  const g = el('g', { opacity }, svg);
+  const dx = x2 - x1, dy = y2 - y1, len = Math.hypot(dx, dy);
+  if (len < 1) return g;
+  const ux = dx / len, uy = dy / len, head = Math.min(13, len * 0.2);
+  const hx = x2 - ux * head, hy = y2 - uy * head, px = -uy, py = ux, w = 5.5;
+  const ln = el('line', { x1, y1, x2: hx, y2: hy, stroke: color, 'stroke-width': width, 'stroke-linecap': 'round' }, g);
+  if (dashed) ln.setAttribute('stroke-dasharray', '6 5');
+  el('polygon', { points: `${x2},${y2} ${hx + px * w},${hy + py * w} ${hx - px * w},${hy - py * w}`, fill: color }, g);
+  return g;
+}
+function line(svg, x1, y1, x2, y2, color, width = 1.5, opacity = 1, dashed = false) {
+  const a = { x1, y1, x2, y2, stroke: color, 'stroke-width': width, 'stroke-linecap': 'round', opacity };
+  if (dashed) a['stroke-dasharray'] = '5 5';
+  return el('line', a, svg);
+}
+function text(svg, x, y, str, color = '#fff', size = 22, italic = true, weight = 400, anchor = 'start') {
+  const t = el('text', { x, y, fill: color, 'font-size': size, 'font-style': italic ? 'italic' : 'normal', 'font-weight': weight, 'text-anchor': anchor }, svg);
+  if (/[\u0302\u0303]/.test(str)) buildHatted(t, str, size);
+  else t.textContent = str;
+  return t;
+}
+/* β̂ / β̃ with a vector caret/tilde measured over the base glyph */
+function buildHatted(t, str, size) {
+  const bases = []; let stripped = '';
+  for (let i = 0; i < str.length; i++) {
+    const c = str[i];
+    if (c === '\u0302' || c === '\u0303') { if (stripped.length) bases.push({ idx: stripped.length - 1, type: c }); }
+    else stripped += c;
+  }
+  t.textContent = stripped;
+  t.setAttribute('xml:space', 'preserve');
+  const svg = t.ownerSVGElement; if (!svg) return;
+  const marks = [];
+  const place = () => bases.forEach((b, k) => {
+    let ext; try { ext = t.getExtentOfChar(b.idx); } catch (e) { return; }
+    const cx = ext.x + ext.width / 2, half = Math.max(ext.width * 0.44, size * 0.22), topY = ext.y - size * 0.12, sw = Math.max(1.5, size * 0.058);
+    let d;
+    if (b.type === '\u0302') { const h = size * 0.20; d = `M ${cx - half} ${topY} L ${cx} ${topY - h} L ${cx + half} ${topY}`; }
+    else { const amp = size * 0.11, w = half * 2, x0 = cx - half, yc = topY - amp; d = `M ${x0} ${yc + amp} C ${x0 + w * 0.22} ${yc - amp}, ${x0 + w * 0.40} ${yc - amp}, ${cx} ${yc} C ${x0 + w * 0.60} ${yc + amp}, ${x0 + w * 0.78} ${yc + amp}, ${x0 + w} ${yc - amp}`; }
+    let m = marks[k];
+    if (!m) { m = el('path', { fill: 'none', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, t.parentNode || svg); marks[k] = m; }
+    m.setAttribute('d', d);
+    m.setAttribute('stroke', t.getAttribute('fill') || '#fff');
+    m.setAttribute('stroke-width', sw);
+    const op = t.getAttribute('opacity'); m.setAttribute('opacity', op == null ? 1 : op);
+  });
+  requestAnimationFrame(() => requestAnimationFrame(place));
+  const mo = new MutationObserver(() => {
+    const op = t.getAttribute('opacity');
+    for (const m of marks) if (op != null) m.setAttribute('opacity', op);
+    if (!t.isConnected) { mo.disconnect(); for (const m of marks) m.remove(); }
+  });
+  mo.observe(t, { attributes: true, attributeFilter: ['opacity'] });
+}
+function animate(duration, onFrame, easing = t => t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2) {
+  return new Promise(resolve => {
+    const start = performance.now();
+    (function frame(now) {
+      const t = Math.min(1, (now - start) / duration);
+      onFrame(easing(t));
+      if (t < 1) requestAnimationFrame(frame); else resolve();
+    })(performance.now());
+  });
+}
+const delay = ms => new Promise(r => setTimeout(r, ms));
+function clear(svg) { while (svg.firstChild) svg.removeChild(svg.firstChild); }
+const lerp = (a, b, t) => a + (b - a) * t;
+/* gooey metaball filter: blur + alpha-contrast so overlapping circles fuse
+   like liquid droplets (used only during the scene-7 bubble merge) */
+function ensureGooFilter(svg) {
+  if (svg.querySelector('#goo')) return;
+  const defs = el('defs', {}, svg);
+  const f = el('filter', { id: 'goo', x: '-50%', y: '-50%', width: '200%', height: '200%' }, defs);
+  el('feGaussianBlur', { in: 'SourceGraphic', stdDeviation: '9', result: 'blur' }, f);
+  el('feColorMatrix', { in: 'blur', mode: 'matrix', values: '1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 21 -9', result: 'goo' }, f);
+  el('feBlend', { in: 'SourceGraphic', in2: 'goo' }, f);
+}
+
+/* =========================================================
+   PLOT MAPPING  — data space → svg space inside a rect
+   ========================================================= */
+function plot(r) {
+  return {
+    ...r,
+    px: dx => r.x + (dx - r.xmin) / (r.xmax - r.xmin) * r.w,
+    py: dy => r.y + r.h - (dy - r.ymin) / (r.ymax - r.ymin) * r.h
+  };
+}
+function drawAxes(svg, P, opacity = 1, xlab = 'X', ylab = 'y') {
+  const g = el('g', { opacity }, svg);
+  arrow(g, P.x, P.y + P.h, P.x + P.w + 8, P.y + P.h, COLORS.axis, 2);      // x-axis
+  arrow(g, P.x, P.y + P.h, P.x, P.y - 8, COLORS.axis, 2);                  // y-axis
+  text(g, P.x + P.w + 4, P.y + P.h + 26, xlab, COLORS.dim, 20, true);
+  text(g, P.x - 26, P.y - 6, ylab, COLORS.dim, 20, true);
+  return g;
+}
+function crosshair(svg, P, opacity = 1) {
+  const g = el('g', { opacity }, svg);
+  const cy = P.py(0), cx = P.px(0);
+  arrow(g, P.x, cy, P.x + P.w + 8, cy, COLORS.axis, 2);
+  arrow(g, cx, P.y + P.h, cx, P.y - 8, COLORS.axis, 2);
+  text(g, P.x + P.w + 4, cy + 26, 'V', COLORS.v, 20, true, 600);
+  text(g, cx - 30, P.y - 6, 'ỹ', COLORS.v, 20, true, 600);
+  return g;
+}
+function dot(parent, x, y, color, r = 8, opacity = 1) {
+  return el('circle', { cx: x, cy: y, r, fill: color, opacity, stroke: 'rgba(0,0,0,0.25)', 'stroke-width': 1 }, parent);
+}
+function fitSeg(svg, P, b0, b1, color, width = 3, opacity = 1, dashed = false) {
+  const x1 = P.xmin, x2 = P.xmax;
+  return line(svg, P.px(x1), P.py(b0 + b1 * x1), P.px(x2), P.py(b0 + b1 * x2), color, width, opacity, dashed);
+}
+function fitSegRange(svg, P, b0, b1, x1, x2, color, width = 3, opacity = 1, dashed = false) {
+  return line(svg, P.px(x1), P.py(b0 + b1 * x1), P.px(x2), P.py(b0 + b1 * x2), color, width, opacity, dashed);
+}
+
+/* =========================================================
+   SCENE 0 — title
+   ========================================================= */
+async function renderSlide0() {
+  const svg = document.getElementById('svg0'); clear(svg);
+  const t1 = el('text', { x: 700, y: 380, fill: '#fff', 'font-size': 76, 'font-weight': 700, 'text-anchor': 'middle', style: 'font-family:"Schibsted Grotesk","Helvetica Neue",Arial,sans-serif', opacity: 0 }, svg);
+  t1.textContent = 'Interpreting Fixed Effects';
+  const t2 = text(svg, 700, 440, 'Applying the FWL theorem', COLORS.dim, 30, true, 400, 'middle');
+  t2.setAttribute('opacity', 0);
+  await animate(900, t => t1.setAttribute('opacity', t));
+  await animate(700, t => t2.setAttribute('opacity', t));
+}
+
+/* =========================================================
+   SCENE 1 — panel data table grouped by state
+   ========================================================= */
+async function renderSlide1() {
+  const svg = document.getElementById('svg1'); clear(svg);
+  const cols = ['id', 'y', 'X', 'fixed effect'];
+  const colW = [110, 150, 150, 260], startX = 430, top = 150, rowH = 56;
+  const totalW = colW.reduce((a, b) => a + b, 0);
+  const cx = i => startX + colW.slice(0, i).reduce((a, b) => a + b, 0) + colW[i] / 2;
+
+  // headers
+  const head = el('g', { opacity: 0 }, svg);
+  cols.forEach((c, i) => text(head, cx(i), top, c, COLORS.white, 26, true, 600, 'middle'));
+  line(head, startX, top + 18, startX + totalW, top + 18, COLORS.axis, 2);
+  await animate(500, t => head.setAttribute('opacity', t));
+
+  // rows, grouped & colored by state
+  for (let i = 0; i < DATA.length; i++) {
+    const d = DATA[i], ry = top + 20 + (i + 1) * rowH, col = COLORS.s[d.s];
+    const g = el('g', { opacity: 0 }, svg);
+    if (i > 0 && DATA[i - 1].s !== d.s) line(svg, startX, ry - rowH + 12, startX + totalW, ry - rowH + 12, COLORS.faint, 1);
+    text(g, cx(0), ry, String(d.id), COLORS.dim, 24, false, 400, 'middle');
+    text(g, cx(1), ry, d.y.toFixed(1), COLORS.white, 24, false, 400, 'middle');
+    text(g, cx(2), ry, d.x.toFixed(1), COLORS.white, 24, false, 400, 'middle');
+    dot(g, cx(3) - 74, ry - 8, col, 7);
+    text(g, cx(3) + 6, ry, STATE_NAME[d.s], col, 24, true, 500, 'middle');
+    svg.appendChild(g);
+    animate(280, t => g.setAttribute('opacity', t));
+    await delay(120);
+  }
+
+  // brace annotation: group = fixed effect
+  const bx = startX + totalW + 40;
+  const br = el('g', { opacity: 0 }, svg);
+  [0, 1, 2].forEach(s => {
+    const rows = DATA.map((d, i) => ({ d, i })).filter(o => o.d.s === s);
+    const y0 = top + 20 + (rows[0].i + 1) * rowH - 34, y1 = top + 20 + (rows[rows.length - 1].i + 1) * rowH + 10;
+    line(br, bx, y0, bx, y1, COLORS.s[s], 3);
+  });
+  text(br, bx + 16, top + 20 + 5 * rowH - 6, 'one group', COLORS.dim, 20, true, 400);
+  text(br, bx + 16, top + 20 + 5 * rowH + 20, 'per state = Wᵢ', COLORS.dim, 20, true, 400);
+  svg.appendChild(br);
+  await animate(500, t => br.setAttribute('opacity', t));
+}
+
+/* =========================================================
+   SCENE 2 — naive pooled regression
+   ========================================================= */
+const BIGPLOT = plot({ x: 470, y: 120, w: 520, h: 470, xmin: 0, xmax: 10, ymin: 2, ymax: 9 });
+// table geometry — must match renderSlide1 so points depart from their rows
+const T_STARTX = 430, T_COLW = [110, 150, 150, 260], T_TOP = 150, T_ROWH = 56;
+const tColCenter = i => T_STARTX + T_COLW.slice(0, i).reduce((a, b) => a + b, 0) + T_COLW[i] / 2;
+const tRowY = i => T_TOP + 20 + (i + 1) * T_ROWH;
+/* Redraw the data table (same geometry as scene 1) into any svg, for the
+   scene-1 → scene-2 hand-off. Returns the group so it can be faded out. */
+function drawDataTable(svg, opacity = 1) {
+  const g = el('g', { opacity }, svg);
+  const cols = ['id', 'y', 'X', 'fixed effect'];
+  const totalW = T_COLW.reduce((a, b) => a + b, 0);
+  cols.forEach((c, i) => text(g, tColCenter(i), T_TOP, c, COLORS.white, 26, true, 600, 'middle'));
+  line(g, T_STARTX, T_TOP + 18, T_STARTX + totalW, T_TOP + 18, COLORS.axis, 2);
+  DATA.forEach((d, i) => {
+    const ry = tRowY(i), col = COLORS.s[d.s];
+    if (i > 0 && DATA[i - 1].s !== d.s) line(g, T_STARTX, ry - T_ROWH + 12, T_STARTX + totalW, ry - T_ROWH + 12, COLORS.faint, 1);
+    text(g, tColCenter(0), ry, String(d.id), COLORS.dim, 24, false, 400, 'middle');
+    text(g, tColCenter(1), ry, d.y.toFixed(1), COLORS.white, 24, false, 400, 'middle');
+    text(g, tColCenter(2), ry, d.x.toFixed(1), COLORS.white, 24, false, 400, 'middle');
+    dot(g, tColCenter(3) - 74, ry - 8, col, 7);
+    text(g, tColCenter(3) + 6, ry, STATE_NAME[d.s], col, 24, true, 500, 'middle');
+  });
+  return g;
+}
+async function renderSlide2() {
+  const svg = document.getElementById('svg2'); clear(svg);
+  // Reproduce the previous slide's table in the SAME position, then lift each
+  // observation's colored marker off its row and fly it onto the plot while the
+  // table fades out — making the scatter visibly the table's data.
+  const table = drawDataTable(svg, 1);
+  const start = DATA.map((d, i) => ({ x: tColCenter(3) - 74, y: tRowY(i) - 8 }));
+  const axes = drawAxes(svg, BIGPLOT, 0);
+  const circles = DATA.map((d, i) => dot(svg, start[i].x, start[i].y, COLORS.s[d.s], 7, 1));
+  await delay(750);
+  const N = DATA.length, spread = 0.4;
+  await animate(1500, t => {
+    circles.forEach((c, i) => {
+      const lead = (i / (N - 1)) * spread;
+      const tt = Math.max(0, Math.min(1, (t - lead) / (1 - spread)));
+      const e = tt < .5 ? 2 * tt * tt : 1 - Math.pow(-2 * tt + 2, 2) / 2;
+      c.setAttribute('cx', lerp(start[i].x, BIGPLOT.px(DATA[i].x), e));
+      c.setAttribute('cy', lerp(start[i].y, BIGPLOT.py(DATA[i].y), e));
+      c.setAttribute('r', lerp(7, 9, e));
+    });
+    table.setAttribute('opacity', 1 - t);          // gradient fade-out of the table
+    axes.setAttribute('opacity', Math.min(1, t * 1.6));
+  }, t => t);
+  table.remove();
+  await delay(150);
+  // pooled line sweeps in
+  const ln = fitSeg(svg, BIGPLOT, POOL.b0, POOL.b1, COLORS.pool, 4, 1);
+  const L = ln.getTotalLength(); ln.setAttribute('stroke-dasharray', L); ln.setAttribute('stroke-dashoffset', L);
+  await animate(800, t => ln.setAttribute('stroke-dashoffset', L * (1 - t)));
+  const lbl = text(svg, BIGPLOT.px(10) - 6, BIGPLOT.py(POOL.b0 + POOL.b1 * 10) - 16, 'pooled  slope ≈ ' + POOL.b1.toFixed(2), COLORS.pool, 22, true, 500, 'end');
+  lbl.setAttribute('opacity', 0);
+  await animate(400, t => lbl.setAttribute('opacity', t));
+}
+
+/* =========================================================
+   SCENE 3 — the groups sit at different levels
+   ========================================================= */
+async function renderSlide3() {
+  const svg = document.getElementById('svg3'); clear(svg);
+  drawAxes(svg, BIGPLOT);
+  DATA.forEach(d => dot(svg, BIGPLOT.px(d.x), BIGPLOT.py(d.y), COLORS.s[d.s], 9, 0.85));
+  // faint pooled line for reference
+  fitSeg(svg, BIGPLOT, POOL.b0, POOL.b1, COLORS.pool, 2.5, 0.35, true);
+  await delay(150);
+  // group means + level lines
+  for (const gr of GROUPS) {
+    const g = el('g', { opacity: 0 }, svg);
+    const mx = BIGPLOT.px(gr.mx), my = BIGPLOT.py(gr.my);
+    line(g, BIGPLOT.x, my, BIGPLOT.x + BIGPLOT.w, my, COLORS.s[gr.g], 1.4, 0.5, true);
+    el('circle', { cx: mx, cy: my, r: 12, fill: 'none', stroke: COLORS.s[gr.g], 'stroke-width': 3 }, g);
+    dot(g, mx, my, COLORS.s[gr.g], 5);
+    text(g, BIGPLOT.x + 8, my - 10, STATE_NAME[gr.g] + ' mean', COLORS.s[gr.g], 18, true, 500);
+    svg.appendChild(g);
+    await animate(400, t => g.setAttribute('opacity', t));
+  }
+  // between-group line through the means
+  const bl = fitSeg(svg, BIGPLOT, BETWEEN.b0, BETWEEN.b1, COLORS.white, 3, 1, false);
+  const L = bl.getTotalLength(); bl.setAttribute('stroke-dasharray', L); bl.setAttribute('stroke-dashoffset', L);
+  await animate(800, t => bl.setAttribute('stroke-dashoffset', L * (1 - t)));
+  const lbl = text(svg, BIGPLOT.px(gr3x()) , BIGPLOT.py(BETWEEN.b0 + BETWEEN.b1 * gr3x()) - 18, 'between-group ≈ ' + BETWEEN.b1.toFixed(2), COLORS.white, 20, true, 500, 'end');
+  lbl.setAttribute('opacity', 0);
+  await animate(400, t => lbl.setAttribute('opacity', t));
+}
+function gr3x() { return 9.6; }
+
+/* =========================================================
+   PANELS (scenes 4–6): three plots side by side
+   ========================================================= */
+const PANEL_GLOBAL = [0, 1, 2].map(g => plot({ x: 100 + g * 435, y: 190, w: 330, h: 360, xmin: 0, xmax: 10, ymin: 2, ymax: 9 }));
+const PANEL_CENTER = [0, 1, 2].map(g => plot({ x: 100 + g * 435, y: 190, w: 330, h: 360, xmin: -2.6, xmax: 2.6, ymin: -2.2, ymax: 2.2 }));
+
+/* SCENE 4 — split into 3 panels (raw, global frame) */
+async function renderSlide4() {
+  const svg = document.getElementById('svg4'); clear(svg);
+  for (let g = 0; g < 3; g++) {
+    const P = PANEL_GLOBAL[g], grp = el('g', { opacity: 0 }, svg);
+    drawAxes(grp, P);
+    text(grp, P.x + P.w / 2, P.y - 22, STATE_NAME[g], COLORS.s[g], 24, true, 600, 'middle');
+    GROUPS[g].pts.forEach(d => dot(grp, P.px(d.x), P.py(d.y), COLORS.s[g], 9, 1));
+    svg.appendChild(grp);
+    await animate(450, t => grp.setAttribute('opacity', t));
+  }
+}
+
+/* SCENE 5 — de-mean: animate each group to its panel center */
+async function renderSlide5() {
+  const svg = document.getElementById('svg5'); clear(svg);
+  const axesC = [], circles = [], globalAxes = [];
+  for (let g = 0; g < 3; g++) {
+    const Pg = PANEL_GLOBAL[g];
+    globalAxes.push(drawAxes(svg, Pg, 1));                   // start: global axes
+    text(svg, Pg.x + Pg.w / 2, Pg.y - 22, STATE_NAME[g], COLORS.s[g], 24, true, 600, 'middle');
+    axesC.push(crosshair(svg, PANEL_CENTER[g], 0));          // target: centered crosshair (hidden)
+    GROUPS[g].pts.forEach(d => {
+      const c = dot(svg, Pg.px(d.x), Pg.py(d.y), COLORS.s[g], 9, 1);
+      circles.push({ c, g, sx: Pg.px(d.x), sy: Pg.py(d.y), ex: PANEL_CENTER[g].px(d.x - GROUPS[g].mx), ey: PANEL_CENTER[g].py(d.y - GROUPS[g].my) });
+    });
+  }
+  await delay(500);
+  await animate(1100, t => {
+    circles.forEach(o => { o.c.setAttribute('cx', lerp(o.sx, o.ex, t)); o.c.setAttribute('cy', lerp(o.sy, o.ey, t)); });
+    globalAxes.forEach(a => a.setAttribute('opacity', lerp(1, 0.12, t)));
+    axesC.forEach(a => a.setAttribute('opacity', t));
+  });
+  // formula annotation
+  const f1 = text(svg, 470, 678, 'Vᵢ = Xᵢ − E[Xᵢ | Wᵢ]', COLORS.v, 31, true, 600, 'middle');
+  const f2 = text(svg, 930, 678, 'ỹᵢ = yᵢ − E[yᵢ | Wᵢ]', COLORS.v, 31, true, 600, 'middle');
+  f1.setAttribute('opacity', 0); f2.setAttribute('opacity', 0);
+  await animate(500, t => { f1.setAttribute('opacity', t); f2.setAttribute('opacity', t); });
+}
+
+/* SCENE 6 — within-group slopes */
+async function renderSlide6() {
+  const svg = document.getElementById('svg6'); clear(svg);
+  for (let g = 0; g < 3; g++) {
+    const P = PANEL_CENTER[g];
+    crosshair(svg, P, 1);
+    text(svg, P.x + P.w / 2, P.y - 22, STATE_NAME[g], COLORS.s[g], 24, true, 600, 'middle');
+    GROUPS[g].pts.forEach(d => dot(svg, P.px(d.x - GROUPS[g].mx), P.py(d.y - GROUPS[g].my), COLORS.s[g], 9, 1));
+  }
+  await delay(200);
+  const wobblers = [];
+  const HALF = 150;   // fixed half-length in px — the line rotates, never stretches
+  for (let g = 0; g < 3; g++) {
+    const P = PANEL_CENTER[g], b1 = GROUPS[g].b1;
+    const ox = P.px(0), oy = P.py(0);
+    const baseAngle = Math.atan2(P.py(b1) - P.py(0), P.px(1) - P.px(0));
+    const hx = Math.cos(baseAngle) * HALF, hy = Math.sin(baseAngle) * HALF;
+    const ln = line(svg, ox - hx, oy - hy, ox + hx, oy + hy, COLORS.fe, 3.5, 1);
+    const L = ln.getTotalLength(); ln.setAttribute('stroke-dasharray', L); ln.setAttribute('stroke-dashoffset', L);
+    animate(700, t => ln.setAttribute('stroke-dashoffset', L * (1 - t)));
+    const lbl = text(svg, P.x + P.w / 2, P.y + P.h + 40, 'β̂ ≈ ' + b1.toFixed(2), COLORS.fe, 24, true, 600, 'middle');
+    lbl.setAttribute('opacity', 0);
+    animate(500, t => lbl.setAttribute('opacity', t));
+    // shake amplitude (in radians) ∝ 1/√Var(X|W): narrow-X groups shake far, wide-X barely
+    wobblers.push({ ln, ox, oy, half: HALF, baseAngle, ampAngle: (11 * Math.PI / 180) * Math.sqrt(REF_SXX / GROUPS[g].sxx) });
+    const stab = text(svg, P.x + P.w / 2, P.y + P.h + 68, g === 0 ? 'narrow X → shakes far' : g === 2 ? 'wide X → barely moves' : '', g === 0 ? COLORS.s[0] : COLORS.s[2], 17, true, 500, 'middle');
+    stab.setAttribute('opacity', 0);
+    animate(500, t => stab.setAttribute('opacity', t));
+    await delay(260);
+  }
+  await delay(650);
+  wobblers.forEach(o => o.ln.removeAttribute('stroke-dasharray'));
+  const setAngle = (o, dphi) => {
+    const a = o.baseAngle + dphi, hx = Math.cos(a) * o.half, hy = Math.sin(a) * o.half;
+    o.ln.setAttribute('x1', o.ox - hx); o.ln.setAttribute('y1', o.oy - hy);
+    o.ln.setAttribute('x2', o.ox + hx); o.ln.setAttribute('y2', o.oy + hy);
+  };
+  // one quick damped shake per click — not a constant writhe
+  const burst = () => {
+    if (wobbleRAF) cancelAnimationFrame(wobbleRAF);
+    const t0 = performance.now(), dur = 1200;
+    (function step(now) {
+      const t = (now - t0) / dur;
+      if (t >= 1) { wobblers.forEach(o => setAngle(o, 0)); wobbleRAF = 0; return; }
+      const env = Math.exp(-3.6 * t) * Math.sin(t * Math.PI * 2 * 3.2);
+      wobblers.forEach(o => setAngle(o, o.ampAngle * env));
+      wobbleRAF = requestAnimationFrame(step);
+    })(performance.now());
+  };
+  svg.style.cursor = 'pointer';
+  svg.onclick = burst;
+  // prominent, breathing call-to-action so the interaction is unmistakable
+  const hintG = el('g', { opacity: 0 }, svg);
+  const bw = 470, bh = 58, hx = 700, hy = 36;
+  el('rect', { x: hx - bw / 2, y: hy - bh / 2, width: bw, height: bh, rx: bh / 2, fill: 'rgba(88,196,221,0.16)', stroke: COLORS.fe, 'stroke-width': 2 }, hintG);
+  text(hintG, hx, hy + 8, '↺  Click anywhere — watch which fit shakes', COLORS.fe, 23, false, 600, 'middle');
+  el('animate', { attributeName: 'opacity', values: '1;0.45;1', dur: '1.5s', begin: '0.6s', repeatCount: 'indefinite' }, hintG);
+  animate(450, t => hintG.setAttribute('opacity', t));
+  setTimeout(() => { if (current === 6) burst(); }, 550);
+  setTimeout(() => { if (current === 6) burst(); }, 1800);   // shake twice up front so it's discoverable
+}
+
+/* SCENE 7 — each state is a bubble sized to hug its points (faithful X-spread);
+   scale the bubbles by weight, then the BUBBLES slide together and fuse (goo).
+   Finally compare the pooled slope with the fixed-effects slope, which swings
+   down from pooled toward the within slope. */
+async function renderSlide7() {
+  const svg = document.getElementById('svg7'); clear(svg);
+  const W = GROUPS.map(gr => gr.sxx / SXX_TOTAL);
+  const scaleT = W.map(w => 0.45 + 1.15 * w);   // tile size ∝ weight
+
+  // --- Phase A: three panels, continuous with the previous slide ---
+  const panels = [], pts = [];
+  const blobG = el('g', {}, svg);
+  for (let g = 0; g < 3; g++) {
+    const P = PANEL_CENTER[g], gr = GROUPS[g];
+    const grp = el('g', {}, svg);
+    crosshair(grp, P, 1);
+    const xr = gr.pts.map(p => p.x - gr.mx), pad = 0.3;
+    fitSegRange(grp, P, 0, gr.b1, Math.min(...xr) - pad, Math.max(...xr) + pad, COLORS.fe, 3, 0.9);
+    text(grp, P.x + P.w / 2, P.y - 22, STATE_NAME[g], COLORS.s[g], 24, true, 600, 'middle');
+    text(grp, P.x + P.w / 2, P.y + P.h + 40, 'β̂ ≈ ' + gr.b1.toFixed(2), COLORS.fe, 24, true, 600, 'middle');
+    panels.push({ grp, P, cx: P.x + P.w / 2, cy: P.y + P.h / 2 });
+  }
+  for (let g = 0; g < 3; g++) {
+    const P = PANEL_CENTER[g], gr = GROUPS[g];
+    svg.appendChild(blobG);   // keep data points above the axes
+    gr.pts.forEach(d => {
+      const dxu = d.x - gr.mx, dyu = d.y - gr.my;
+      pts.push({ c: dot(blobG, P.px(dxu), P.py(dyu), COLORS.s[g], 8, 1), g, bx: P.px(dxu), by: P.py(dyu) });
+    });
+  }
+  await delay(600);
+
+  // --- Phase B: scale each tile (panel + points) by its weight ---
+  const wl = panels.map((pn, g) => {
+    const t = text(svg, pn.cx, pn.P.y + pn.P.h + 78, (W[g] * 100).toFixed(0) + '% weight', COLORS.s[g], 21, true, 600, 'middle');
+    t.setAttribute('opacity', 0); return t;
+  });
+  await animate(1100, t => {
+    for (let g = 0; g < 3; g++) {
+      const s = lerp(1, scaleT[g], t), pn = panels[g];
+      pn.grp.setAttribute('transform', `translate(${pn.cx} ${pn.cy}) scale(${s}) translate(${-pn.cx} ${-pn.cy})`);
+      wl[g].setAttribute('opacity', t);
+    }
+    pts.forEach(o => {
+      const pn = panels[o.g], s = lerp(1, scaleT[o.g], t);
+      o.c.setAttribute('cx', pn.cx + (o.bx - pn.cx) * s);
+      o.c.setAttribute('cy', pn.cy + (o.by - pn.cy) * s);
+      o.c.setAttribute('r', 8 * (0.72 + 0.28 * s));
+    });
+  });
+}
+
+/* SCENE 8 — merge the weighted tiles into one cloud; pooled vs fixed-effects.
+   Starts already-scaled (matching slide 7's end) and merges automatically. */
+async function renderSlide8() {
+  const svg = document.getElementById('svg8'); clear(svg);
+  const myToken = ++s8token; const alive = () => myToken === s8token;
+  const W = GROUPS.map(gr => gr.sxx / SXX_TOTAL);
+  const scaleT = W.map(w => 0.45 + 1.15 * w);
+
+  // start already-scaled (identical to the end of the previous slide)
+  const panels = [], pts = [];
+  const blobG = el('g', {}, svg);
+  for (let g = 0; g < 3; g++) {
+    const P = PANEL_CENTER[g], gr = GROUPS[g], s = scaleT[g], cx = P.x + P.w / 2, cy = P.y + P.h / 2;
+    const grp = el('g', { transform: `translate(${cx} ${cy}) scale(${s}) translate(${-cx} ${-cy})` }, svg);
+    crosshair(grp, P, 1);
+    const xr = gr.pts.map(p => p.x - gr.mx), pad = 0.3;
+    fitSegRange(grp, P, 0, gr.b1, Math.min(...xr) - pad, Math.max(...xr) + pad, COLORS.fe, 3, 0.9);
+    text(grp, P.x + P.w / 2, P.y - 22, STATE_NAME[g], COLORS.s[g], 24, true, 600, 'middle');
+    text(grp, P.x + P.w / 2, P.y + P.h + 40, 'β̂ ≈ ' + gr.b1.toFixed(2), COLORS.fe, 24, true, 600, 'middle');
+    const wlbl = text(svg, cx, P.y + P.h + 78, (W[g] * 100).toFixed(0) + '% weight', COLORS.s[g], 21, true, 600, 'middle');
+    panels.push({ grp, wl: wlbl });
+  }
+  for (let g = 0; g < 3; g++) {
+    const P = PANEL_CENTER[g], gr = GROUPS[g], s = scaleT[g], cx = P.x + P.w / 2, cy = P.y + P.h / 2;
+    svg.appendChild(blobG);   // keep data points above the axes
+    gr.pts.forEach(d => {
+      const dxu = d.x - gr.mx, dyu = d.y - gr.my, sx = cx + (P.px(dxu) - cx) * s, sy = cy + (P.py(dyu) - cy) * s;
+      pts.push({ c: dot(blobG, sx, sy, COLORS.s[g], 8 * (0.72 + 0.28 * s), 1), g, dxu, dyu, sx, sy, r0: 8 * (0.72 + 0.28 * s) });
+    });
+  }
+  await delay(650);
+  if (!alive()) return;
+
+  // merge into one combined scatter
+  const BIG = plot({ x: 200, y: 150, w: 540, h: 360, xmin: -3.0, xmax: 3.0, ymin: -2.2, ymax: 2.2 });
+  const bigAx = crosshair(svg, BIG, 0);
+  await animate(600, t => panels.forEach(pn => { pn.grp.setAttribute('opacity', 1 - t); pn.wl.setAttribute('opacity', 1 - t); }));
+  panels.forEach(pn => { pn.grp.remove(); pn.wl.remove(); });
+  if (!alive()) return;
+  const eArrive = x => 1 - Math.pow(1 - x, 4);
+  await animate(1300, T => {
+    const e = eArrive(T);
+    bigAx.setAttribute('opacity', Math.min(1, T * 1.9));
+    pts.forEach(o => { o.c.setAttribute('cx', lerp(o.sx, BIG.px(o.dxu), e)); o.c.setAttribute('cy', lerp(o.sy, BIG.py(o.dyu), e)); o.c.setAttribute('r', lerp(o.r0, 8, e)); });
+  }, t => t);
+  if (!alive()) return;
+
+  // pooled vs FE — the FE line starts on the pooled slope and swings down
+  svg.appendChild(blobG);
+  const x1 = BIG.xmin, x2 = BIG.xmax;
+  line(svg, BIG.px(x1), BIG.py(POOL.b1 * x1), BIG.px(x2), BIG.py(POOL.b1 * x2), COLORS.pool, 3, 0.9, true);
+  const pLbl = text(svg, BIG.px(x2) + 8, BIG.py(POOL.b1 * x2), 'pooled ≈ ' + POOL.b1.toFixed(2), COLORS.pool, 22, true, 600, 'start');
+  pLbl.setAttribute('opacity', 0); await animate(450, t => pLbl.setAttribute('opacity', t));
+  await delay(250);
+  const halo = line(svg, BIG.px(x1), BIG.py(POOL.b1 * x1), BIG.px(x2), BIG.py(POOL.b1 * x2), '#12100d', 9, 1);
+  const feLine = line(svg, BIG.px(x1), BIG.py(POOL.b1 * x1), BIG.px(x2), BIG.py(POOL.b1 * x2), COLORS.fe, 4.5, 1);
+  const eBack = x => { const c1 = 1.4, c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); };
+  await animate(1250, t => {
+    const s = lerp(POOL.b1, FE_SLOPE, eBack(t));
+    halo.setAttribute('y1', BIG.py(s * x1)); halo.setAttribute('y2', BIG.py(s * x2));
+    feLine.setAttribute('y1', BIG.py(s * x1)); feLine.setAttribute('y2', BIG.py(s * x2));
+  });
+  await animate(360, t => feLine.setAttribute('stroke-width', 4.5 + Math.sin(t * Math.PI) * 3));
+  const feLbl = text(svg, BIG.px(x2) + 8, BIG.py(FE_SLOPE * x2), 'FE ≈ ' + FE_SLOPE.toFixed(2), COLORS.fe, 24, true, 600, 'start');
+  feLbl.setAttribute('opacity', 0); animate(400, t => feLbl.setAttribute('opacity', t));
+
+  // formula + compact recap on the right (slope + weight per state)
+  const bx = 1010, by = 250;
+  const eq = text(svg, bx, by, 'β̂ = Σ wᵢ · β̂(Wᵢ)', COLORS.fe, 40, true, 600);
+  eq.setAttribute('opacity', 0); await animate(500, t => eq.setAttribute('opacity', t));
+  for (let g = 0; g < 3; g++) {
+    const row = el('g', { opacity: 0 }, svg), yy = by + 58 + g * 50;
+    dot(row, bx + 8, yy - 7, COLORS.s[g], 9);
+    text(row, bx + 32, yy, STATE_NAME[g], COLORS.s[g], 25, true, 500);
+    text(row, bx + 190, yy, 'slope ' + GROUPS[g].b1.toFixed(2), COLORS.dim, 23, true, 400);
+    text(row, bx + 380, yy, (W[g] * 100).toFixed(0) + '%', COLORS.s[g], 26, false, 600);
+    animate(400, t => row.setAttribute('opacity', t)); await delay(160);
+  }
+  const note = text(svg, bx, by + 58 + 3 * 50 + 30, 'wide-X states dominate the fit', COLORS.dim, 23, true, 400);
+  note.setAttribute('opacity', 0); await animate(400, t => note.setAttribute('opacity', t));
+}
+
+/* =========================================================
+   ORCHESTRATION
+   ========================================================= */
+const slides = [
+  { id: 's0', render: renderSlide0 }, { id: 's1', render: renderSlide1 },
+  { id: 's2', render: renderSlide2 }, { id: 's3', render: renderSlide3 },
+  { id: 's4', render: renderSlide4 }, { id: 's5', render: renderSlide5 },
+  { id: 's6', render: renderSlide6 }, { id: 's7', render: renderSlide7 },
+  { id: 's8', render: renderSlide8 }
+];
+let current = 0;
+let wobbleRAF = 0;
+let s7token = 0;
+let s8token = 0;
+function show(i) {
+  if (wobbleRAF) { cancelAnimationFrame(wobbleRAF); wobbleRAF = 0; }
+  slides.forEach((s, idx) => document.getElementById(s.id).classList.toggle('active', idx === i));
+  document.getElementById('pager').textContent = `${i + 1} / ${slides.length}`;
+  slides[i].render();
+}
+function next() { if (current < slides.length - 1) { current++; show(current); } }
+function prev() { if (current > 0) { current--; show(current); } }
+function replay() { show(current); }
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); next(); }
+  else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); prev(); }
+  else if (e.key === 'r' || e.key === 'R') replay();
+  else if (e.key === 'f' || e.key === 'F') { if (!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); }
+});
+document.getElementById('playBtn').addEventListener('click', replay);
+show(0);
+document.querySelectorAll('.caption').forEach(c => {
+  c.innerHTML = c.innerHTML
+    .split('\u03b2\u0302').join('<span class="hacc">\u03b2<svg class="acc" viewBox="0 0 24 12"><path d="M2 10 L12 3 L22 10"/></svg></span>')
+    .split('\u03b2\u0303').join('<span class="tacc">\u03b2<svg class="acc" viewBox="0 0 24 12"><path d="M2 8 C6 3 9 3 12 6 C15 9 18 9 22 4"/></svg></span>');
+});
+</script>
+</body>
+</html>
